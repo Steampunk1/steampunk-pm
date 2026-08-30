@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Steampunk PM</title>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="PM">
+<meta name="theme-color" content="#0A0B0D">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+/* ============================================================
+   STEAMPUNK FABRICATION — Color & Type Foundations
+   Industrial welding & fabrication brand.
+   Import this file, then use the CSS variables below.
+   ============================================================ */
+
+/* --- Fonts ---------------------------------------------------
+   The logo wordmark is a custom chrome-beveled industrial italic.
+   Saira Condensed (Black, italic-capable) is the nearest Google
+   Fonts match and is used for display headlines.  FLAGGED: this
+   is a substitution — swap in the licensed logo face if available.
+   ------------------------------------------------------------ */
+@import url('https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700;800;900&family=Saira:ital,wght@0,400;0,500;0,600;0,700;1,500;1,700&family=Barlow:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* ---------- Brand core ---------- */
+  --ink:            #0A0B0D;   /* logo ground, deepest dark            */
+  --gunmetal-900:   #131619;
+  --gunmetal-800:   #1D2228;
+  --gunmetal-700:   #2A313A;
+  --gunmetal-600:   #3B444F;
+  --slate-navy:     #1B2C49;   /* brand navy (flyer header)            */
+  --slate-navy-600: #25406A;   /* lighter navy                          */
+
+  /* ---------- Steel neutral scale (cool grey) ---------- */
+  --steel-900: #14171B;
+  --steel-800: #21262C;
+  --steel-700: #2F363F;
+  --steel-600: #434C57;
+  --steel-500: #5C6670;
+  --steel-400: #7E8893;
+  --steel-300: #A6AEB7;
+  --steel-200: #C9CFD5;
+  --steel-100: #E4E8EB;
+  --steel-050: #F1F3F5;
+  --chrome:    #F6F8FA;        /* near-white                            */
+
+  /* ---------- Accents ---------- */
+  --hivis:        #A6CE39;     /* safety lime — primary accent          */
+  --hivis-600:    #8DB22A;     /* pressed / darker lime                 */
+  --hivis-300:    #C6E06F;     /* tint                                  */
+  --safety-orange:#E8631A;     /* hazard / hot CTA — use sparingly      */
+  --safety-orange-600:#C44E0F;
+  --weld-amber:   #C9842E;     /* weld-heat tempering tone (tertiary)   */
+
+  /* ---------- Status ---------- */
+  --ok:    #4FA36B;
+  --warn:  #E8A33D;
+  --danger:#D2402F;
+  --info:  #3F86C6;
+
+  /* ---------- Chrome / metal gradients ---------- */
+  --chrome-gradient: linear-gradient(180deg,#FFFFFF 0%,#D7DDE2 18%,#9AA3AB 48%,#5C656E 52%,#AEB6BD 78%,#EEF1F3 100%);
+  --steel-sheen:     linear-gradient(180deg,#E9ECEF 0%,#BFC6CC 45%,#8C949C 55%,#C7CDD2 100%);
+  --navy-fade:       linear-gradient(180deg,#25406A 0%,#1B2C49 60%,#121C30 100%);
+
+  /* ---------- Semantic surfaces ---------- */
+  --bg:          var(--ink);
+  --surface-1:   var(--gunmetal-900);
+  --surface-2:   var(--gunmetal-800);
+  --surface-3:   var(--gunmetal-700);
+  --border:      #323A43;
+  --border-soft: #262C33;
+  --hairline:    rgba(255,255,255,0.08);
+
+  /* on-dark text */
+  --fg:    #EDF0F2;
+  --fg-2:  #AEB6BD;
+  --fg-3:  #79828B;
+  --on-accent: #0A0B0D;
+
+  /* ---------- Type families ---------- */
+  --font-display: 'Saira Condensed', 'Arial Narrow', sans-serif;
+  --font-head:    'Saira', system-ui, sans-serif;
+  --font-body:    'Barlow', system-ui, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+
+  /* ---------- Type scale (1.25 major-third-ish) ---------- */
+  --t-display: 800 clamp(44px, 6vw, 92px)/0.94 var(--font-display);
+  --t-h1:      800 clamp(34px, 4vw, 56px)/1.02 var(--font-display);
+  --t-h2:      700 clamp(26px, 2.6vw, 38px)/1.06 var(--font-display);
+  --t-h3:      600 22px/1.2 var(--font-head);
+  --t-h4:      600 18px/1.25 var(--font-head);
+  --t-body:    400 16px/1.6 var(--font-body);
+  --t-body-lg: 400 18px/1.6 var(--font-body);
+  --t-small:   500 13px/1.5 var(--font-body);
+  --t-mono:    500 13px/1.5 var(--font-mono);
+  --t-eyebrow: 700 13px/1 var(--font-head);
+
+  /* ---------- Radii (industrial = tight) ---------- */
+  --r-xs: 2px;
+  --r-sm: 4px;
+  --r-md: 6px;
+  --r-lg: 10px;
+  --r-pill: 999px;
+
+  /* ---------- Spacing (8pt grid) ---------- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px; --sp-9: 96px;
+
+  /* ---------- Elevation ---------- */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+  --shadow-md: 0 6px 18px rgba(0,0,0,.45);
+  --shadow-lg: 0 18px 48px rgba(0,0,0,.55);
+  --inset-top: inset 0 1px 0 rgba(255,255,255,.06);
+
+  /* ---------- Motion ---------- */
+  --ease: cubic-bezier(.2,.7,.3,1);
+  --dur:  .18s;
+}
+
+/* ---------- Semantic element styles ---------- */
+.h-display { font: var(--t-display); text-transform: uppercase; letter-spacing: .01em; font-style: italic; color: var(--fg); }
+.h1 { font: var(--t-h1); text-transform: uppercase; letter-spacing: .01em; color: var(--fg); }
+.h2 { font: var(--t-h2); text-transform: uppercase; letter-spacing: .01em; color: var(--fg); }
+.h3 { font: var(--t-h3); color: var(--fg); }
+.h4 { font: var(--t-h4); color: var(--fg); }
+.body    { font: var(--t-body); color: var(--fg-2); }
+.body-lg { font: var(--t-body-lg); color: var(--fg-2); }
+.small   { font: var(--t-small); color: var(--fg-3); }
+.mono    { font: var(--t-mono); letter-spacing: .02em; color: var(--fg-2); }
+.eyebrow {
+  font: var(--t-eyebrow); text-transform: uppercase; letter-spacing: .22em;
+  color: var(--hivis);
+}
+
+/* Chrome metallic text treatment — for the wordmark / hero only */
+.chrome-text {
+  font: var(--t-display);
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+  background: var(--chrome-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-stroke: 0.5px rgba(0,0,0,.25);
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,.6));
+}
+
+  </style>
+  <style>
+    body{margin:0;background:#0A0B0D}
+    a{color:#A6CE39} a:hover{color:#C5E366}
+    input:focus,select:focus,textarea:focus{outline:2px solid #A6CE39;outline-offset:-1px}
+  </style>
+</helmet>
+<div style="min-height:100vh;background:#0A0B0D;color:#F6F8FA;font-family:Barlow,sans-serif;padding:0 0 96px">
+  <div style="max-width:760px;margin:0 auto;padding:24px 16px;display:flex;flex-direction:column;gap:20px">
+    <div style="border-bottom:1px solid #323A43;padding-bottom:14px;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <img src="steampunk-logo.jpg" alt="Steampunk Fabrication" style="width:40px;height:40px;border-radius:4px;flex-shrink:0">
+        <div>
+          <div style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.22em;text-transform:uppercase;color:#A6CE39">Darling Ingredients, Byram, Miss. &middot; Preventive Maintenance</div>
+          <div style="font:900 italic 30px 'Saira Condensed',sans-serif;text-transform:uppercase;line-height:1.05">Screw Conveyor Info</div>
+        </div>
+      </div>
+    </div>
+
+    <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="5">
+      <div style="display:flex;flex-direction:column;gap:12px;background:#131619;border:1px solid #323A43;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.45)">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font:900 italic 16px 'Saira Condensed',sans-serif;color:#A6CE39">{{ sec.num }}</span>
+          <span style="font:900 italic 18px 'Saira Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em">{{ sec.title }}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px">
+          <sc-for list="{{ sec.fields }}" as="fld" hint-placeholder-count="4">
+            <label style="display:flex;flex-direction:column;gap:5px;gridColumn:{{ fld.span }}">
+              <span style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#7E8893">{{ fld.label }}</span>
+              <sc-if value="{{ fld.isText }}" hint-placeholder-val="{{ true }}">
+                <input type="text" name="{{ fld.key }}" value="{{ fld.value }}" onChange="{{ onField }}" placeholder="{{ fld.ph }}" style="background:#1D2228;border:1px solid #323A43;color:#F6F8FA;font:500 16px Barlow,sans-serif;padding:10px 12px;min-height:44px;border-radius:4px;width:100%;box-sizing:border-box">
+              </sc-if>
+              <sc-if value="{{ fld.isSelect }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <sc-for list="{{ fld.options }}" as="opt" hint-placeholder-count="2">
+                    <button type="button" onClick="{{ opt.pick }}" style="background:{{ opt.bg }};border:1px solid {{ opt.border }};color:{{ opt.color }};font:600 14px Barlow,sans-serif;padding:10px 14px;min-height:44px;border-radius:4px;cursor:pointer;flex:1;min-width:56px">{{ opt.label }}</button>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ fld.isArea }}" hint-placeholder-val="{{ false }}">
+                <textarea name="{{ fld.key }}" value="{{ fld.value }}" onChange="{{ onField }}" rows="3" placeholder="{{ fld.ph }}" style="background:#1D2228;border:1px solid #323A43;color:#F6F8FA;font:500 16px Barlow,sans-serif;padding:10px 12px;border-radius:4px;width:100%;box-sizing:border-box;resize:vertical"></textarea>
+              </sc-if>
+            </label>
+          </sc-for>
+        </div>
+        <sc-if value="{{ sec.note }}" hint-placeholder-val="{{ false }}">
+          <div style="background:#1B2C49;border:1px solid #323A43;padding:10px 12px;font:500 13px Barlow,sans-serif;color:#C9CFD5"><strong style="color:#A6CE39;font-weight:700">FINISHED PRODUCT RULE: </strong>{{ sec.note }}</div>
+        </sc-if>
+      </div>
+    </sc-for>
+
+    <div style="display:flex;flex-direction:column;gap:12px;background:#131619;border:1px solid #323A43;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.45)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font:900 italic 16px 'Saira Condensed',sans-serif;color:#A6CE39">05</span>
+        <span style="font:900 italic 18px 'Saira Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em">Photos</span>
+        <span style="font:500 12px Barlow,sans-serif;color:#7E8893">flight wear &middot; motor nameplate &middot; gearbox tag &middot; wiper blade</span>
+      </div>
+      <label style="display:flex;align-items:center;justify-content:center;gap:8px;border:1px dashed #434C57;padding:16px;cursor:pointer;font:600 12px 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:#A6CE39">
+        + Add photos (camera or library)
+        <input type="file" accept="image/*" multiple="multiple" onChange="{{ onPhotos }}" style="display:none">
+      </label>
+      <div style="font:500 11px Barlow,sans-serif;color:#7E8893">Tip: on iPhone, press and hold any photo below, then choose &ldquo;Save to Photos&rdquo; &mdash; works even if the download button below doesn&rsquo;t.</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px">
+        <sc-for list="{{ photos }}" as="ph" hint-placeholder-count="0">
+          <div style="display:flex;flex-direction:column;gap:6px;border:1px solid #323A43;padding:6px;background:#1D2228">
+            <div style="width:100%;height:110px;background-color:#131619;background-image:url({{ ph.src }});background-size:cover;background-position:center"></div>
+            <input type="text" value="{{ ph.label }}" data-idx="{{ $index }}" onChange="{{ onPhotoLabel }}" placeholder="Label (e.g. flight wear mid)" style="background:#131619;border:1px solid #323A43;color:#F6F8FA;font:500 13px Barlow,sans-serif;padding:6px 8px;border-radius:4px;width:100%;box-sizing:border-box">
+            <button data-idx="{{ $index }}" onClick="{{ removePhoto }}" style="background:none;border:1px solid #323A43;color:#7E8893;font:600 10px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:6px;cursor:pointer">Remove</button>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px;background:#131619;border:1px solid #323A43;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.45)">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font:900 italic 16px 'Saira Condensed',sans-serif;color:#A6CE39">06</span>
+        <span style="font:900 italic 18px 'Saira Condensed',sans-serif;text-transform:uppercase;letter-spacing:.04em">Export to Maintenance Connection</span>
+      </div>
+      <div style="font:500 13px Barlow,sans-serif;color:#A6AEB7">CSV opens straight in Excel / MC import. Photos download named by asset tag &mdash; no reading handwriting off a picture.</div>
+      <sc-if value="{{ hasPhotos }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ copyPhotoSheet }}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#1B2C49;border:1px solid #323A43;color:#F6F8FA;font:700 13px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;min-height:48px;cursor:pointer;border-radius:4px;width:100%;box-sizing:border-box">1 &middot; Copy Photo Sheet ({{ photoCount }} photos, 1 image)</button>
+      </sc-if>
+      <a href="{{ mailtoHref }}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#A6CE39;border:none;color:#0A0B0D;font:700 13px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;min-height:48px;cursor:pointer;border-radius:4px;text-decoration:none;box-sizing:border-box" style-hover="background:#8DB22A">{{ emailBtnLabel }}</a>
+      <div style="font:500 11px Barlow,sans-serif;color:#7E8893">{{ emailHint }}</div>
+      <sc-if value="{{ shareOK }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ sharePhotos }}" style="background:none;border:1px solid #434C57;color:#F6F8FA;font:600 11px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:10px 14px;min-height:44px;cursor:pointer;border-radius:4px">Or: share report + photos via iPhone share sheet&hellip;</button>
+      </sc-if>
+      <sc-if value="{{ photoSheet }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font:500 11px Barlow,sans-serif;color:#7E8893">Backup: press and hold the photo sheet below &rarr; Copy Image (or Save / Share).</div>
+          <img src="{{ photoSheet }}" alt="Photo sheet" style="width:100%;border:1px solid #323A43;border-radius:4px;display:block">
+        </div>
+      </sc-if>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;border-top:1px solid #262C33;padding-top:12px">
+        <button onClick="{{ exportCSV }}" style="background:none;border:1px solid #434C57;color:#F6F8FA;font:600 12px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:12px 18px;min-height:44px;cursor:pointer;border-radius:4px" style-hover="border-color:#A6CE39">Export CSV</button>
+        <button onClick="{{ copySummary }}" style="background:none;border:1px solid #434C57;color:#F6F8FA;font:600 12px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:12px 18px;min-height:44px;cursor:pointer;border-radius:4px" style-hover="border-color:#A6CE39">Copy for paste-in</button>
+        <button onClick="{{ downloadPhotos }}" style="background:none;border:1px solid #434C57;color:#F6F8FA;font:600 12px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:12px 18px;min-height:44px;cursor:pointer;border-radius:4px" style-hover="border-color:#A6CE39">Download photos</button>
+      </div>
+      <sc-if value="{{ csvText }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:6px;border-top:1px solid #262C33;padding-top:12px">
+          <div style="font:500 11px Barlow,sans-serif;color:#7E8893">If the file didn&rsquo;t save (common on iPhone), tap the box below to select the text, then Copy &mdash; paste into Email, Messages, or Excel.</div>
+          <textarea value="{{ csvText }}" onChange="{{ ignoreEdit }}" onClick="{{ onCsvTap }}" onFocus="{{ onCsvTap }}" rows="4" style="background:#131619;border:1px solid #323A43;color:#F6F8FA;font:400 11px 'JetBrains Mono',monospace;padding:8px;border-radius:4px;width:100%;box-sizing:border-box;resize:vertical"></textarea>
+        </div>
+      </sc-if>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;border-top:1px solid #262C33;padding-top:12px">
+        <button onClick="{{ saveSheet }}" style="background:#1B2C49;border:1px solid #323A43;color:#F6F8FA;font:600 12px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:12px 18px;min-height:44px;cursor:pointer;border-radius:4px">Save sheet on device</button>
+        <button onClick="{{ newSheet }}" style="background:none;border:1px solid #434C57;color:#7E8893;font:600 12px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:12px 18px;min-height:44px;cursor:pointer;border-radius:4px">New blank sheet</button>
+        <sc-if value="{{ hasSaved }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ exportAll }}" style="background:none;border:1px solid #434C57;color:#F6F8FA;font:600 12px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:12px 18px;min-height:44px;cursor:pointer;border-radius:4px" style-hover="border-color:#A6CE39">Export all saved ({{ savedCount }}) CSV</button>
+        </sc-if>
+      </div>
+      <sc-if value="{{ hasSaved }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.12em;text-transform:uppercase;color:#7E8893">Saved on this device</div>
+          <sc-for list="{{ saved }}" as="rec" hint-placeholder-count="0">
+            <div style="display:flex;align-items:center;gap:10px;border:1px solid #262C33;padding:8px 10px;background:#1D2228">
+              <span style="font:600 13px 'JetBrains Mono',monospace;color:#F6F8FA">{{ rec.title }}</span>
+              <span style="font:500 12px Barlow,sans-serif;color:#7E8893">{{ rec.sub }}</span>
+              <span style="flex:1"></span>
+              <button data-idx="{{ $index }}" onClick="{{ loadSheet }}" style="background:none;border:1px solid #434C57;color:#A6CE39;font:600 10px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;cursor:pointer">Load</button>
+              <button data-idx="{{ $index }}" onClick="{{ deleteSheet }}" style="background:none;border:1px solid #323A43;color:#7E8893;font:600 10px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:6px 10px;cursor:pointer">Delete</button>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#A6CE39;color:#0A0B0D;font:700 12px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:12px 20px;border-radius:4px;box-shadow:0 6px 18px rgba(0,0,0,.45);z-index:50">{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const FIELDS = [
+  ['assetId','Asset ID / Tag #','e.g. SC-114'],['location','Location / Area','e.g. Cook Room'],['date','Date','MM/DD/YYYY'],['inspector','Inspector',''],
+  ['screwDia','Screw size (dia)','e.g. 12"'],['screwLen','Overall length','e.g. 24 ft'],['pitch','Pitch','e.g. full / 12"'],['flightThk','Flight thickness','e.g. 3/8"'],
+  ['rebuildQty','Screws for rebuild (qty)',''],['shearPins','Shear pin count',''],['shearPinDia','Shear pin dia','e.g. 1/4"'],['shearPinLen','Shear pin length','e.g. 1.5"'],['connShaftSize','Connecting shaft size',''],['connShaftQty','Connecting shaft qty',''],['tailShaftSize','Tail shaft size (dia)',''],['plateEnd','Plate end (no tail shaft)?',''],['specialOrder','Special order?',''],['hangerBrg','Hanger bearing',''],['tailBrg','Tail bearing',''],['tailBrgSize','Tail bearing size',''],['tailBrgStyle','Tail bearing style',''],['bushingCap','Brass bushing cap?',''],['wiperLen','Wiper blade length','e.g. 14\"'],['wiperThk','Wiper blade thickness','e.g. 1/4\"'],['wiperDist','Barrel end to wiper start','e.g. 8\"'],['wiperDriveSide','Wiper on drive side?',''],
+  ['troughType','Trough type',''],['lidCount','# of lids',''],['lidBolts','Lid bolt count',''],['gasketMat','Gasket material','e.g. blue food grade'],
+  ['driveshaftPn','Driveshaft part # / size',''],['gearboxBrand','Gearbox brand','e.g. Dodge, SEW'],['gearboxSize','Gearbox size / model',''],['motorHp','Motor HP',''],['motorFrame','Motor frame','e.g. 256T'],['motorRpm','Motor RPM',''],
+  ['beltSize','Belt size','e.g. B68'],['beltQty','Belt qty',''],['pulleyMotor','Motor pulley size & hub style',''],['pulleyGearbox','Gearbox pulley size & hub style',''],
+  ['chainDriven','Chain driven?',''],['sprocketBoreMotor','Drive sprocket bore',''],['sprocketTeethMotor','Drive sprocket teeth',''],['sprocketBoreDrive','Driven sprocket bore',''],['sprocketTeethDrive','Driven sprocket teeth',''],['chainSize','Chain size','e.g. #60'],
+  ['wearInlet','Flight wear - inlet',''],['wearMid','Flight wear - middle',''],['wearDischarge','Flight wear - discharge',''],['wearLiners','Wear liners in trough?',''],['wearLinerCond','Wear liner condition','e.g. good / worn / missing'],
+  ['slackOk','Shafts/connections checked for slack',''],['leakOk','No possible product leak',''],['setScrewsOk','All set screws and bolts tightened?',''],['oilChanged','Changed oil in gearbox?',''],['guardOk','Guard secured and not rubbing belts?',''],['lidsSealed','All lids overlapping correctly and bolted securely?',''],['partsNeeded','Repairs / parts needed',''],['notes','Notes','']
+];
+const LABELS = Object.fromEntries(FIELDS.map(f => [f[0], f[1]]));
+const SELECTS = {specialOrder:['Y','N'],hangerBrg:['Y','N'],tailBrg:['Y','N'],bushingCap:['Y','N'],plateEnd:['Y','N'],troughType:['U trough','Pipe trough'],chainDriven:['Y','N'],slackOk:['Yes - OK','Slack found'],leakOk:['Yes - sealed','Leak point found'],setScrewsOk:['Y','N'],oilChanged:['Y','N'],guardOk:['Y','N'],lidsSealed:['Y','N'],wearLiners:['Y','N'],wiperDriveSide:['Y','N','No wiper']};
+const AREAS = ['partsNeeded','notes'];
+const SECTIONS = [
+  {num:'00',title:'Asset',keys:['assetId','location','date','inspector']},
+  {num:'01',title:'Screw & Flighting',keys:['screwDia','screwLen','pitch','flightThk','rebuildQty','shearPins','shearPinDia','shearPinLen','connShaftSize','connShaftQty','tailShaftSize','plateEnd','specialOrder','hangerBrg','tailBrg','tailBrgSize','tailBrgStyle','bushingCap','wiperLen','wiperThk','wiperDist','wiperDriveSide']},
+  {num:'02',title:'Trough, Lids & Gaskets',keys:['troughType','lidCount','lidBolts','gasketMat'],note:'Blue food-grade gasket required on finished-product screws — Rotex screen (grind room) through Lemanco (loadout).'},
+  {num:'03',title:'Drive Train',keys:['driveshaftPn','gearboxBrand','gearboxSize','motorHp','motorFrame','motorRpm','beltSize','beltQty','pulleyMotor','pulleyGearbox','chainDriven','sprocketBoreMotor','sprocketTeethMotor','sprocketBoreDrive','sprocketTeethDrive','chainSize']},
+  {num:'04',title:'Inspection & Wear',keys:['wearInlet','wearMid','wearDischarge','wearLiners','wearLinerCond','slackOk','leakOk','setScrewsOk','oilChanged','guardOk','lidsSealed','partsNeeded','notes']}
+];
+const DRAFT_KEY = 'scpm_draft_v1', REC_KEY = 'scpm_records_v1';
+const csvCell = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+
+class Component extends DCLogic {
+  state = { f: {}, photos: [], saved: [], toast: '', csvText: '', photoSheet: '', shareOK: false };
+  componentDidMount() {
+    try {
+      const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
+      const r = JSON.parse(localStorage.getItem(REC_KEY) || '[]');
+      this.setState({ f: (d && d.f) || {}, photos: (d && d.photos) || [], saved: r });
+    } catch (e) {}
+    try {
+      const probe = new File(['x'], 'x.jpg', { type: 'image/jpeg' });
+      if (navigator.canShare && navigator.canShare({ files: [probe] })) this.setState({ shareOK: true });
+    } catch (e) {}
+  }
+  persistDraft() { try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ f: this.state.f, photos: this.state.photos })); } catch (e) { this.flash('Storage full - too many photos'); } }
+  flash(msg) { this.setState({ toast: msg }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: '' }), 2200); }
+  fileName(ext) { const id = (this.state.f.assetId || 'screw-conveyor').replace(/[^\w-]+/g, '_'); return id + ext; }
+
+  onField = e => { const { name, value } = e.target; this.setState(s => ({ f: { ...s.f, [name]: value } }), () => this.persistDraft()); };
+  pickOption(key, val) { return () => this.setState(s => ({ f: { ...s.f, [key]: s.f[key] === val ? '' : val } }), () => this.persistDraft()); }
+  onPhotos = async e => {
+    const files = Array.from(e.target.files || []); e.target.value = '';
+    for (const file of files) {
+      const src = await new Promise(res => {
+        const rd = new FileReader();
+        rd.onload = () => { const img = new Image(); img.onload = () => {
+          const sc = Math.min(1, 1100 / Math.max(img.width, img.height));
+          const c = document.createElement('canvas'); c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+          c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', .72));
+        }; img.src = rd.result; };
+        rd.readAsDataURL(file);
+      });
+      this.setState(s => ({ photos: [...s.photos, { src, label: '' }] }));
+    }
+    this.persistDraft();
+  };
+  onPhotoLabel = e => { const i = +e.target.dataset.idx; this.setState(s => { const p = s.photos.slice(); p[i] = { ...p[i], label: e.target.value }; return { photos: p }; }, () => this.persistDraft()); };
+  removePhoto = e => { const i = +e.currentTarget.dataset.idx; this.setState(s => ({ photos: s.photos.filter((_, j) => j !== i) }), () => this.persistDraft()); };
+
+  buildRow(f) { return FIELDS.map(fd => csvCell(f[fd[0]])); }
+  download(name, mime, text) { const a = document.createElement('a'); a.href = 'data:' + mime + ';charset=utf-8,' + encodeURIComponent(text); a.download = name; a.click(); }
+  ignoreEdit = () => {};
+  onCsvTap = e => { e.target.select(); };
+  buildMailto() {
+    const f = this.state.f;
+    const filled = FIELDS.filter(fd => (f[fd[0]] || '').trim());
+    const body = (filled.length ? filled.map(fd => fd[1] + ': ' + f[fd[0]]).join('\n') : 'No data entered yet.')
+      + (this.state.photos.length ? '\n\nPHOTO SHEET: press and hold here, then tap Paste.\n' : '');
+    const subject = 'Screw Conveyor PM' + (f.assetId ? ' — ' + f.assetId : '') + (f.date ? ' — ' + f.date : '');
+    return 'mailto:blang@steampunkfab.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  }
+  dataUrlToBlob(u) {
+    const parts = u.split(',');
+    const mime = (parts[0].match(/data:([^;]+)/) || [null, 'image/jpeg'])[1];
+    const bin = atob(parts[1]); const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: mime });
+  }
+  loadImg(src) { return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; }); }
+  async renderPhotoSheet() {
+    const { f, photos } = this.state;
+    const W = 900, PAD = 16, HEAD = 52, LABEL = 32;
+    const imgs = await Promise.all(photos.map(p => this.loadImg(p.src)));
+    let h = HEAD;
+    const rows = imgs.map((im, i) => {
+      const w = W - PAD * 2; const ih = Math.round(im.height * (w / im.width));
+      const y = h; h += LABEL + ih + PAD;
+      return { im, y, w, ih, label: (photos[i].label || 'Photo ' + (i + 1)) };
+    });
+    const c = document.createElement('canvas'); c.width = W; c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#0A0B0D'; ctx.fillRect(0, 0, W, h);
+    ctx.fillStyle = '#A6CE39'; ctx.font = '700 22px Barlow, sans-serif';
+    ctx.fillText('SCREW CONVEYOR PM' + (f.assetId ? ' — ' + f.assetId : '') + (f.date ? ' — ' + f.date : ''), PAD, 34);
+    rows.forEach(r => {
+      ctx.fillStyle = '#F6F8FA'; ctx.font = '600 17px Barlow, sans-serif';
+      ctx.fillText(r.label, PAD, r.y + 22);
+      ctx.drawImage(r.im, PAD, r.y + LABEL, r.w, r.ih);
+    });
+    return c;
+  }
+  copyPhotoSheet = () => {
+    if (!this.state.photos.length) return this.flash('No photos yet');
+    const canvasP = this.renderPhotoSheet();
+    canvasP.then(c => this.setState({ photoSheet: c.toDataURL('image/jpeg', .8) }), () => {});
+    if (navigator.clipboard && window.ClipboardItem) {
+      const blobP = canvasP.then(c => new Promise(res => c.toBlob(res, 'image/png')));
+      navigator.clipboard.write([new ClipboardItem({ 'image/png': blobP })]).then(
+        () => this.flash('Photo sheet copied — now tap Email, then Paste into it'),
+        () => this.flash('Copy blocked — press and hold the photo sheet below instead')
+      );
+    } else {
+      this.flash('Press and hold the photo sheet below to copy it');
+    }
+  };
+  sharePhotos = () => {
+    const { f, photos } = this.state;
+    const tag = (f.assetId || 'screw-conveyor').replace(/[^\w-]+/g, '_');
+    const files = photos.map((p, i) => new File([this.dataUrlToBlob(p.src)], tag + '_' + (p.label ? p.label.replace(/[^\w-]+/g, '_') : 'photo' + (i + 1)) + '.jpg', { type: 'image/jpeg' }));
+    const text = FIELDS.filter(fd => (f[fd[0]] || '').trim()).map(fd => fd[1] + ': ' + f[fd[0]]).join('\n');
+    try { navigator.share({ title: 'Screw Conveyor PM', text: text || 'Screw Conveyor PM', files }).catch(() => {}); }
+    catch (e) { this.flash('Share not available — use Copy Photo Sheet instead'); }
+  };
+  exportCSV = () => {
+    const head = FIELDS.map(fd => csvCell(fd[1])).join(',');
+    const csv = head + '\n' + this.buildRow(this.state.f).join(',') + '\n';
+    this.download(this.fileName('_info.csv'), 'text/csv', csv);
+    this.setState({ csvText: csv });
+    this.flash('CSV exported');
+  };
+  exportAll = () => {
+    const head = FIELDS.map(fd => csvCell(fd[1])).join(',');
+    const rows = this.state.saved.map(r => this.buildRow(r.f).join(','));
+    const csv = [head, ...rows].join('\n') + '\n';
+    this.download('screw_conveyors_all.csv', 'text/csv', csv);
+    this.setState({ csvText: csv });
+    this.flash('All sheets exported');
+  };
+  copySummary = () => {
+    const f = this.state.f;
+    const txt = FIELDS.filter(fd => (f[fd[0]] || '').trim()).map(fd => fd[1] + ': ' + f[fd[0]]).join('\n');
+    navigator.clipboard.writeText(txt || 'No data entered yet').then(() => this.flash('Copied - paste into MC'), () => this.flash('Copy failed'));
+  };
+  downloadPhotos = () => {
+    if (!this.state.photos.length) return this.flash('No photos yet');
+    this.state.photos.forEach((p, i) => {
+      const a = document.createElement('a');
+      a.href = p.src; a.download = this.fileName('_' + (p.label ? p.label.replace(/[^\w-]+/g, '_') : 'photo' + (i + 1)) + '.jpg');
+      setTimeout(() => a.click(), i * 350);
+    });
+    this.flash('Downloading ' + this.state.photos.length + ' photo(s)');
+  };
+
+  saveSheet = () => {
+    const f = this.state.f;
+    if (!(f.assetId || '').trim()) return this.flash('Enter an Asset ID first');
+    this.setState(s => {
+      const saved = s.saved.filter(r => r.f.assetId !== f.assetId);
+      saved.unshift({ f: { ...f }, photoCount: s.photos.length, ts: new Date().toLocaleDateString() });
+      try { localStorage.setItem(REC_KEY, JSON.stringify(saved)); } catch (e) {}
+      return { saved };
+    }, () => this.flash('Sheet saved'));
+  };
+  loadSheet = e => { const r = this.state.saved[+e.currentTarget.dataset.idx]; if (r) this.setState({ f: { ...r.f }, photos: [] }, () => { this.persistDraft(); this.flash('Loaded ' + (r.f.assetId || 'sheet')); }); };
+  deleteSheet = e => { const i = +e.currentTarget.dataset.idx; this.setState(s => { const saved = s.saved.filter((_, j) => j !== i); try { localStorage.setItem(REC_KEY, JSON.stringify(saved)); } catch (err) {} return { saved }; }); };
+  newSheet = () => { if (confirm('Clear this sheet? Unsaved data will be lost.')) this.setState({ f: {}, photos: [] }, () => this.persistDraft()); };
+
+  renderVals() {
+    const { f, photos, saved, toast, csvText, photoSheet, shareOK } = this.state;
+    const sections = SECTIONS.map(sec => ({
+      num: sec.num, title: sec.title, note: sec.note || false,
+      fields: sec.keys.map(k => {
+        const fd = FIELDS.find(x => x[0] === k);
+        const isSelect = !!SELECTS[k], isArea = AREAS.includes(k);
+        const val = f[k] || '';
+        const options = (SELECTS[k] || []).map(opt => ({
+          label: opt, active: val === opt,
+          bg: val === opt ? '#A6CE39' : '#1D2228', border: val === opt ? '#A6CE39' : '#323A43', color: val === opt ? '#0A0B0D' : '#F6F8FA',
+          pick: this.pickOption(k, opt)
+        }));
+        return { key: k, label: fd[1], ph: fd[2], value: val, options, isSelect, isArea, isText: !isSelect && !isArea, span: isArea ? '1 / -1' : 'auto' };
+      })
+    }));
+    return {
+      sections, photos, toast, csvText, mailtoHref: this.buildMailto(),
+      hasPhotos: photos.length > 0, photoCount: photos.length, photoSheet, shareOK: shareOK && photos.length > 0,
+      emailBtnLabel: photos.length ? '2 · Email to Brennan' : 'Email This Sheet to Brennan',
+      emailHint: photos.length
+        ? 'Tap 1 to copy all photos as one image, tap 2 to open the email (already addressed and filled in) — then press and hold in the message and tap Paste, and Send.'
+        : 'Opens Mail, already addressed and filled in — just review and tap Send.',
+      copyPhotoSheet: this.copyPhotoSheet, sharePhotos: this.sharePhotos,
+      saved: saved.map(r => ({ ...r, title: r.f.assetId || '(no ID)', sub: (r.f.location ? r.f.location + ' · ' : '') + r.ts + (r.photoCount ? ' · ' + r.photoCount + ' photos' : '') })),
+      hasSaved: saved.length > 0, savedCount: saved.length,
+      onField: this.onField, onPhotos: this.onPhotos, onPhotoLabel: this.onPhotoLabel, removePhoto: this.removePhoto,
+      ignoreEdit: this.ignoreEdit, onCsvTap: this.onCsvTap,
+      exportCSV: this.exportCSV, exportAll: this.exportAll, copySummary: this.copySummary, downloadPhotos: this.downloadPhotos,
+      saveSheet: this.saveSheet, loadSheet: this.loadSheet, deleteSheet: this.deleteSheet, newSheet: this.newSheet
+    };
+  }
+}
+</script>
+</body>
+</html>
