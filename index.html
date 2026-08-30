@@ -247,11 +247,12 @@
       </div>
       <div style="font:500 13px Barlow,sans-serif;color:#A6AEB7">CSV opens straight in Excel / MC import. Photos download named by asset tag &mdash; no reading handwriting off a picture.</div>
       <sc-if value="{{ pdfOK }}" hint-placeholder-val="{{ false }}">
-        <button onClick="{{ exportPDF }}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#A6CE39;border:none;color:#0A0B0D;font:700 13px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;min-height:48px;cursor:pointer;border-radius:4px;width:100%;box-sizing:border-box" style-hover="background:#8DB22A">Export PDF &mdash; Sheet + Photos</button>
-        <div style="font:500 11px Barlow,sans-serif;color:#7E8893">One PDF of the filled-out sheet with every photo included &mdash; share it to Mail, save it to Files, or attach it straight to the work order.</div>
+        <button onClick="{{ exportPDF }}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#A6CE39;border:none;color:#0A0B0D;font:700 13px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:14px 18px;min-height:48px;cursor:pointer;border-radius:4px;width:100%;box-sizing:border-box" style-hover="background:#8DB22A">Email PDF to Brennan &mdash; Sheet + Photos</button>
+        <div style="font:500 12px Barlow,sans-serif;color:#A6AEB7;line-height:1.6">Builds one PDF of the whole sheet with every photo, then opens the share menu: tap <strong style="color:#F6F8FA">Mail</strong> &mdash; the PDF is already attached &mdash; and send it to <strong style="color:#A6CE39">blang@steampunkfab.com</strong> (Mail remembers the address after the first send). Or pick <strong style="color:#F6F8FA">Save to Files</strong> to attach it to the work order.</div>
       </sc-if>
-      <a href="{{ mailtoHref }}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#1B2C49;border:1px solid #323A43;color:#F6F8FA;font:700 12px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:12px 18px;min-height:44px;cursor:pointer;border-radius:4px;text-decoration:none;box-sizing:border-box">Email to Brennan (text only)</a>
-      <div style="font:500 11px Barlow,sans-serif;color:#7E8893">Opens Mail addressed and filled in with the sheet text &mdash; attach the PDF in Mail if you saved it to Files.</div>
+      <sc-if value="{{ noPdf }}" hint-placeholder-val="{{ false }}">
+        <a href="{{ mailtoHref }}" style="display:flex;align-items:center;justify-content:center;gap:8px;background:#1B2C49;border:1px solid #323A43;color:#F6F8FA;font:700 12px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:12px 18px;min-height:44px;cursor:pointer;border-radius:4px;text-decoration:none;box-sizing:border-box">Email to Brennan (text only)</a>
+      </sc-if>
       <div style="display:flex;flex-wrap:wrap;gap:10px;border-top:1px solid #262C33;padding-top:12px">
         <button onClick="{{ exportCSV }}" style="background:none;border:1px solid #434C57;color:#F6F8FA;font:600 12px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:12px 18px;min-height:44px;cursor:pointer;border-radius:4px" style-hover="border-color:#A6CE39">Export CSV</button>
         <button onClick="{{ copySummary }}" style="background:none;border:1px solid #434C57;color:#F6F8FA;font:600 12px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;padding:12px 18px;min-height:44px;cursor:pointer;border-radius:4px" style-hover="border-color:#A6CE39">Copy for paste-in</button>
@@ -454,13 +455,14 @@ class Component extends DCLogic {
       const blob = doc.output('blob');
       const file = new File([blob], name, { type: 'application/pdf' });
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({ files: [file], title: name }).then(() => this.flash('PDF shared'), () => {});
+        navigator.share({ files: [file], title: name, text: 'Screw Conveyor PM - email to blang@steampunkfab.com' }).then(() => this.flash('Tap Mail - send to blang@steampunkfab.com'), () => {});
         return;
       }
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = name; a.click();
       setTimeout(() => URL.revokeObjectURL(url), 5000);
-      this.flash('PDF downloaded');
+      window.location.href = this.buildMailto();
+      this.flash('PDF downloaded - attach it to the email that just opened');
     } catch (e) { this.flash('PDF failed: ' + e.message); }
   };
   exportCSV = () => {
@@ -526,7 +528,7 @@ class Component extends DCLogic {
     return {
       sections, photos, toast, csvText, mailtoHref: this.buildMailto(),
       hasPhotos: photos.length > 0, photoCount: photos.length,
-      pdfOK: typeof window.jspdf !== 'undefined',
+      pdfOK: typeof window.jspdf !== 'undefined', noPdf: typeof window.jspdf === 'undefined',
       a2hs, dismissA2hs: this.dismissA2hs, exportPDF: this.exportPDF,
       saved: saved.map(r => ({ ...r, title: r.f.assetId || '(no ID)', sub: (r.f.location ? r.f.location + ' · ' : '') + r.ts + (r.photoCount ? ' · ' + r.photoCount + ' photos' : '') })),
       hasSaved: saved.length > 0, savedCount: saved.length,
