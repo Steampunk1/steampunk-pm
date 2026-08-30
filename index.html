@@ -309,10 +309,10 @@ const FIELDS = [
   ['beltSize','Belt size','e.g. B68'],['beltQty','Belt qty',''],['pulleyMotor','Motor pulley size & hub style',''],['pulleyGearbox','Gearbox pulley size & hub style',''],
   ['chainDriven','Chain driven?',''],['sprocketBoreMotor','Drive sprocket bore',''],['sprocketTeethMotor','Drive sprocket teeth',''],['sprocketBoreDrive','Driven sprocket bore',''],['sprocketTeethDrive','Driven sprocket teeth',''],['chainSize','Chain size','e.g. #60'],
   ['wearInlet','Flight wear - inlet',''],['wearMid','Flight wear - middle',''],['wearDischarge','Flight wear - discharge',''],['wearLiners','Wear liners in trough?',''],['wearLinerCond','Wear liner condition','e.g. good / worn / missing'],
-  ['slackOk','Shafts/connections checked for slack',''],['leakOk','No possible product leak',''],['setScrewsOk','All set screws and bolts tightened?',''],['oilChanged','Changed oil in gearbox?',''],['guardOk','Guard secured and not rubbing belts?',''],['lidsSealed','All lids overlapping correctly and bolted securely?',''],['partsNeeded','Repairs / parts needed',''],['notes','Notes','']
+  ['slackOk','Shafts/connections checked for slack',''],['leakOk','No possible product leak',''],['setScrewsOk','All set screws and bolts tightened?',''],['oilChanged','Changed oil in gearbox?',''],['guardOk','Guard secured and not rubbing belts?',''],['lidsSealed','All lids overlapping correctly and bolted securely?',''],['lockWashersOk','Lock washers: end plate to adapter plate & adapter plate to gearbox?',''],['partsNeeded','Repairs / parts needed',''],['notes','Notes','']
 ];
 const LABELS = Object.fromEntries(FIELDS.map(f => [f[0], f[1]]));
-const SELECTS = {specialOrder:['Y','N'],hangerBrg:['Y','N'],tailBrg:['Y','N'],bushingCap:['Y','N'],plateEnd:['Y','N'],troughType:['U trough','Pipe trough'],chainDriven:['Y','N'],slackOk:['Yes - OK','Slack found'],leakOk:['Yes - sealed','Leak point found'],setScrewsOk:['Y','N'],oilChanged:['Y','N'],guardOk:['Y','N'],lidsSealed:['Y','N'],wearLiners:['Y','N'],wiperDriveSide:['Y','N','No wiper']};
+const SELECTS = {specialOrder:['Y','N'],hangerBrg:['Y','N'],tailBrg:['Y','N'],bushingCap:['Y','N'],plateEnd:['Y','N'],troughType:['U trough','Pipe trough'],chainDriven:['Y','N'],slackOk:['Yes - OK','Slack found'],leakOk:['Yes - sealed','Leak point found'],setScrewsOk:['Y','N'],oilChanged:['Y','N'],guardOk:['Y','N'],lidsSealed:['Y','N'],lockWashersOk:['Y','N'],wearLiners:['Y','N'],wiperDriveSide:['Y','N','No wiper']};
 const AREAS = ['partsNeeded','notes'];
 // Quick-fill chips: STARTER lists from the sheet's own example values — swap for the plant's real most-used parts.
 // numeric = digit pad (counts); decimal = digits + point (measurements; fractions come from the chips)
@@ -321,26 +321,38 @@ const INPUTMODE = { rebuildQty: 'numeric', shearPins: 'numeric', connShaftQty: '
 const SHAFT_BY_SCREW = { '6"': '1 1/2"', '9"': '2"', '12"': '3"' };
 const SHAFT_AUTO_VALS = ['1 1/2"', '2"', '3"'];
 const PIN_DIA_BY_SCREW = { '9"': '5/8"', '12"': '3/4"' };
-const PIN_DIA_VALS = ['5/8"', '3/4"'];
+const PIN_DIA_VALS = ['1/2"', '5/8"', '3/4"'];
 const PIN_LEN_BY_SCREW = { '9"': '4 1/2"', '12"': '5 1/2"' };
-const PIN_LEN_VALS = ['4 1/2"', '5 1/2"'];
+const PIN_LEN_VALS = ['4"', '4 1/2"', '5 1/2"'];
+const PIN_LEN_BY_DIA = { '1/2"': '4"', '5/8"': '4 1/2"', '3/4"': '5 1/2"' };
+const PIN_DIA_BY_LEN = { '4"': '1/2"', '4 1/2"': '5/8"', '5 1/2"': '3/4"' };
+const NA = 'N/A';
+// N/A correlations: when a condition rules parts out, mark their fields N/A (and un-mark if the condition flips back)
+const CORR = [
+  { key: 'plateEnd', is: v => v === 'Y', note: 'tail shaft/bearing fields', set: { tailShaftSize: NA, tailBrg: 'N', tailBrgSize: NA, tailBrgStyle: NA } },
+  { key: 'chainDriven', is: v => v === 'N', note: 'chain fields', set: { sprocketBoreMotor: NA, sprocketTeethMotor: NA, sprocketBoreDrive: NA, sprocketTeethDrive: NA, chainSize: NA } },
+  { key: 'chainDriven', is: v => v === 'Y', note: 'belt fields', set: { beltSize: NA, beltQty: NA, pulleyMotor: NA, pulleyGearbox: NA } },
+  { key: 'wearLiners', is: v => v === 'N', note: 'wear liner condition', set: { wearLinerCond: NA } },
+  { key: 'wiperDriveSide', is: v => v === 'No wiper', note: 'wiper fields', set: { wiperLen: NA, wiperThk: NA, wiperDist: NA } }
+];
+const HUB_STYLES = ['SKS', 'SDS', 'Powerdrive'];
 const SUGGEST = {
   screwDia: ['16"','12"','9"','6"'],
   pitch: ['Standard'],
   flightThk: ['1/4"','3/8"','1/2"'],
-  shearPinDia: ['5/8"','3/4"'],
-  shearPinLen: ['4 1/2"','5 1/2"'],
+  shearPinDia: ['1/2"','5/8"','3/4"','7/8"'],
+  shearPinLen: ['4"','4 1/2"','5 1/2"','6"'],
   connShaftSize: ['1 1/2"','2"','3"'],
   tailShaftSize: ['1 1/2"','2"','3"'],
   gasketMat: ['RTV','Blue food grade'],
   gearboxBrand: ['Dodge','Vortex'],
   motorHp: ['3','5','7.5','10','15'],
   motorRpm: ['1800','3600'],
-  motorFrame: ['184T','213T'],
+  motorFrame: ['184T','213T','256T'],
   inspector: ['Rat Nuts Bass'],
   beltSize: ['B60','B68','B75'],
   beltQty: ['1','2','3'],
-  chainSize: ['#50','#60','#80'],
+  chainSize: ['#60','#80','#100','#120'],
   wearLinerCond: ['Good','Worn','Missing']
 };
 const SECTIONS = [
@@ -348,7 +360,7 @@ const SECTIONS = [
   {num:'01',title:'Screw & Flighting',keys:['screwDia','screwLen','pitch','flightThk','rebuildQty','shearPins','shearPinDia','shearPinLen','connShaftSize','connShaftQty','tailShaftSize','plateEnd','specialOrder','hangerBrg','tailBrg','tailBrgSize','tailBrgStyle','bushingCap','wiperLen','wiperThk','wiperDist','wiperDriveSide']},
   {num:'02',title:'Trough, Lids & Gaskets',keys:['troughType','lidCount','lidBolts','gasketMat'],note:'Blue food-grade gasket required on finished-product screws — Rotex screen (grind room) through Lemanco (loadout).'},
   {num:'03',title:'Drive Train',keys:['driveshaftPn','gearboxBrand','gearboxSize','motorHp','motorFrame','motorRpm','beltSize','beltQty','pulleyMotor','pulleyGearbox','chainDriven','sprocketBoreMotor','sprocketTeethMotor','sprocketBoreDrive','sprocketTeethDrive','chainSize']},
-  {num:'04',title:'Inspection & Wear',keys:['wearInlet','wearMid','wearDischarge','wearLiners','wearLinerCond','slackOk','leakOk','setScrewsOk','oilChanged','guardOk','lidsSealed','partsNeeded','notes']}
+  {num:'04',title:'Inspection & Wear',keys:['wearInlet','wearMid','wearDischarge','wearLiners','wearLinerCond','slackOk','leakOk','setScrewsOk','oilChanged','guardOk','lidsSealed','lockWashersOk','partsNeeded','notes']}
 ];
 const DRAFT_KEY = 'scpm_draft_v1', REC_KEY = 'scpm_records_v1';
 const DEFAULTS = { pitch: 'Standard', flightThk: '3/8"', beltQty: '2' };
@@ -374,28 +386,46 @@ class Component extends DCLogic {
 
   applyDerived(f, key, prev) {
     const notes = [];
-    const setAuto = (fk, map, autoVals, label) => {
+    const fill = (fk, next, autoVals, label) => {
       const cur = f[fk] || '';
-      if (!cur || autoVals.indexOf(cur) >= 0) {
-        const next = map[f.screwDia] || '';
+      if (!cur || cur === next || autoVals.indexOf(cur) >= 0) {
         if (next !== cur) { f[fk] = next; if (next) notes.push(label + ' ' + next); }
       }
     };
     if (key === 'screwDia') {
-      setAuto('connShaftSize', SHAFT_BY_SCREW, SHAFT_AUTO_VALS, 'shaft');
-      setAuto('shearPinDia', PIN_DIA_BY_SCREW, PIN_DIA_VALS, 'pin');
-      setAuto('shearPinLen', PIN_LEN_BY_SCREW, PIN_LEN_VALS, 'x');
+      fill('connShaftSize', SHAFT_BY_SCREW[f.screwDia] || '', SHAFT_AUTO_VALS, 'shaft');
+      fill('shearPinDia', PIN_DIA_BY_SCREW[f.screwDia] || '', PIN_DIA_VALS, 'pin');
+      fill('shearPinLen', PIN_LEN_BY_SCREW[f.screwDia] || '', PIN_LEN_VALS, 'x');
     }
+    // pin dia <-> length pairings (1/2 pairs with 4; 7/8 and 6 have no pair, so they change nothing)
+    if (key === 'shearPinDia' && PIN_LEN_BY_DIA[f.shearPinDia]) fill('shearPinLen', PIN_LEN_BY_DIA[f.shearPinDia], PIN_LEN_VALS, 'pin length');
+    if (key === 'shearPinLen' && PIN_DIA_BY_LEN[f.shearPinLen]) fill('shearPinDia', PIN_DIA_BY_LEN[f.shearPinLen], PIN_DIA_VALS, 'pin dia');
     if (key === 'screwDia' || key === 'connShaftSize') {
       // tail shaft mirrors connecting shaft, unless the tech typed their own tail size
       const t = f.tailShaftSize || '';
-      const follows = !t || SHAFT_AUTO_VALS.indexOf(t) >= 0 || t === ((prev && prev.connShaftSize) || '');
+      const follows = !t || t === NA || SHAFT_AUTO_VALS.indexOf(t) >= 0 || t === ((prev && prev.connShaftSize) || '');
       if (follows && (f.connShaftSize || '') !== t) {
         f.tailShaftSize = f.connShaftSize || '';
         if (f.tailShaftSize) notes.push('tail shaft ' + f.tailShaftSize);
       }
     }
-    if (notes.length) this._derivedNote = (key === 'screwDia' ? 'Auto-set for ' + f.screwDia + ' screw: ' : 'Auto-set: ') + notes.join(' ');
+    for (const r of CORR) {
+      if (r.key !== key) continue;
+      const on = r.is(f[key] || '');
+      let touched = false;
+      for (const fk in r.set) {
+        const target = r.set[fk];
+        const cur = f[fk] || '';
+        if (on) {
+          const ok = cur === '' || cur === NA || cur === target || (fk === 'beltQty' && cur === '2');
+          if (ok && cur !== target) { f[fk] = target; touched = true; }
+        } else if (cur === target) {
+          f[fk] = '';
+        }
+      }
+      if (on && touched) notes.push(r.note + ' marked ' + (r.set[Object.keys(r.set)[0]] === 'N' ? 'N' : NA));
+    }
+    if (notes.length) this._derivedNote = (key === 'screwDia' ? 'Auto-set for ' + f.screwDia + ' screw: ' : 'Auto-set: ') + notes.join(', ');
     return f;
   }
   setField(key, value) {
@@ -407,6 +437,12 @@ class Component extends DCLogic {
   onField = e => { const { name, value } = e.target; this.setField(name, value); };
   pickOption(key, val) { return () => this.setField(key, this.state.f[key] === val ? '' : val); }
   pickToday() { return () => { const d = new Date(); const t = (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear(); this.setState(s => ({ f: { ...s.f, date: s.f.date === t ? '' : t } }), () => this.persistDraft()); }; }
+  pickToken(key, tok) { return () => {
+    let cur = (this.state.f[key] || '').trim();
+    if (cur === NA) cur = '';
+    const next = cur.indexOf(tok) >= 0 ? cur.replace(tok, '').replace(/\s+/g, ' ').trim() : (cur ? cur + ' ' : '') + tok;
+    this.setField(key, next);
+  }; }
   onPhotos = async e => {
     const files = Array.from(e.target.files || []); e.target.value = '';
     for (const file of files) {
@@ -594,12 +630,16 @@ class Component extends DCLogic {
         }));
         const d = new Date();
         const today = (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
-        const suggVals = k === 'date' ? [today] : (SUGGEST[k] || []);
-        const sugg = suggVals.map(v => ({
-          label: k === 'date' ? 'Today' : v, active: val === v,
-          bg: val === v ? '#A6CE39' : '#131619', border: val === v ? '#A6CE39' : '#3B444F', color: val === v ? '#0A0B0D' : '#A6AEB7',
-          pick: this.pickOption(k, v)
-        }));
+        const isHub = k === 'pulleyMotor' || k === 'pulleyGearbox';
+        const suggVals = k === 'date' ? [today] : isHub ? HUB_STYLES : (SUGGEST[k] || []);
+        const sugg = suggVals.map(v => {
+          const act = isHub ? val.indexOf(v) >= 0 : val === v;
+          return {
+            label: k === 'date' ? 'Today' : v, active: act,
+            bg: act ? '#A6CE39' : '#131619', border: act ? '#A6CE39' : '#3B444F', color: act ? '#0A0B0D' : '#A6AEB7',
+            pick: isHub ? this.pickToken(k, v) : this.pickOption(k, v)
+          };
+        });
         return { key: k, label: fd[1], ph: fd[2], value: val, options, sugg, hasSugg: sugg.length > 0, imode: INPUTMODE[k] || 'text', isSelect, isArea, isText: !isSelect && !isArea, span: isArea ? '1 / -1' : 'auto' };
       })
     }));
