@@ -357,7 +357,6 @@ const SUGGEST = {
   motorHp: ['3','5','7.5','10','15'],
   motorRpm: ['1800','3600'],
   motorFrame: ['184T','213T','256T'],
-  inspector: ['Rat Nuts Bass'],
   beltSize: ['B60','B68','B75'],
   beltQty: ['1','2','3'],
   chainSize: ['#60','#80','#100','#120'],
@@ -444,12 +443,14 @@ class Component extends DCLogic {
     return f;
   }
   setField(key, value) {
+    if (key === 'inspector' && (value || '').trim() && value !== 'RAT NUTZ') value = 'RAT NUTZ';
     this._derivedNote = null;
     const f = this.applyDerived({ ...this.state.f, [key]: value }, key, this.state.f);
     const note = this._derivedNote;
     this.setState({ f }, () => { this.persistDraft(); if (note) this.flash(note); });
   }
   onField = e => { const { name, value } = e.target; this.setField(name, value); };
+  outF() { return { ...this.state.f, inspector: 'RAT NUTZ' }; }
   pickOption(key, val) { return () => this.setField(key, this.state.f[key] === val ? '' : val); }
   pickToday() { return () => { const d = new Date(); const t = (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear(); this.setState(s => ({ f: { ...s.f, date: s.f.date === t ? '' : t } }), () => this.persistDraft()); }; }
   pickToken(key, tok) { return () => {
@@ -482,7 +483,7 @@ class Component extends DCLogic {
   ignoreEdit = () => {};
   onCsvTap = e => { e.target.select(); };
   buildMailto() {
-    const f = this.state.f;
+    const f = this.outF();
     const filled = FIELDS.filter(fd => (f[fd[0]] || '').trim());
     const body = (filled.length ? filled.map(fd => fd[1] + ': ' + f[fd[0]]).join('\n') : 'No data entered yet.');
     const subject = 'Screw Conveyor PM' + (f.assetId ? ' — ' + f.assetId : '') + (f.date ? ' — ' + f.date : '');
@@ -498,7 +499,7 @@ class Component extends DCLogic {
   buildPdf() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'pt', format: 'letter' });
-    const f = this.state.f, S = v => this.pdfSafe(v);
+    const f = this.outF(), S = v => this.pdfSafe(v);
     const M = 40, W = 612 - M * 2, PAIR_W = (W - 20) / 2;
     let y = M;
     const breakIf = need => { if (y + need > 752) { doc.addPage(); y = M; } };
@@ -588,7 +589,7 @@ class Component extends DCLogic {
   };
   exportCSV = () => {
     const head = FIELDS.map(fd => csvCell(fd[1])).join(',');
-    const csv = head + '\n' + this.buildRow(this.state.f).join(',') + '\n';
+    const csv = head + '\n' + this.buildRow(this.outF()).join(',') + '\n';
     this.download(this.fileName('_info.csv'), 'text/csv', csv);
     this.setState({ csvText: csv });
     this.flash('CSV exported');
@@ -602,7 +603,7 @@ class Component extends DCLogic {
     this.flash('All sheets exported');
   };
   copySummary = () => {
-    const f = this.state.f;
+    const f = this.outF();
     const txt = FIELDS.filter(fd => (f[fd[0]] || '').trim()).map(fd => fd[1] + ': ' + f[fd[0]]).join('\n');
     navigator.clipboard.writeText(txt || 'No data entered yet').then(() => this.flash('Copied - paste into MC'), () => this.flash('Copy failed'));
   };
@@ -617,7 +618,7 @@ class Component extends DCLogic {
   };
 
   saveSheet = () => {
-    const f = this.state.f;
+    const f = this.outF();
     if (!(f.assetId || '').trim()) return this.flash('Enter an Asset ID first');
     this.setState(s => {
       const saved = s.saved.filter(r => r.f.assetId !== f.assetId);
