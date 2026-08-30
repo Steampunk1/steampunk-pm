@@ -320,19 +320,24 @@ const INPUTMODE = { rebuildQty: 'numeric', shearPins: 'numeric', connShaftQty: '
 // plant standard: connecting shaft size follows screw size
 const SHAFT_BY_SCREW = { '6"': '1 1/2"', '9"': '2"', '12"': '3"' };
 const SHAFT_AUTO_VALS = ['1 1/2"', '2"', '3"'];
+const PIN_DIA_BY_SCREW = { '9"': '5/8"', '12"': '3/4"' };
+const PIN_DIA_VALS = ['5/8"', '3/4"'];
+const PIN_LEN_BY_SCREW = { '9"': '4 1/2"', '12"': '5 1/2"' };
+const PIN_LEN_VALS = ['4 1/2"', '5 1/2"'];
 const SUGGEST = {
   screwDia: ['16"','12"','9"','6"'],
   pitch: ['Standard'],
   flightThk: ['1/4"','3/8"','1/2"'],
-  shearPinDia: ['1/4"','5/16"','3/8"','1/2"'],
-  shearPinLen: ['1"','1 1/2"','2"'],
+  shearPinDia: ['5/8"','3/4"'],
+  shearPinLen: ['4 1/2"','5 1/2"'],
   connShaftSize: ['1 1/2"','2"','3"'],
   tailShaftSize: ['1 1/2"','2"','3"'],
-  gasketMat: ['Blue food grade','Red rubber'],
-  gearboxBrand: ['Dodge','SEW'],
-  motorHp: ['5','7.5','10','15','20','25'],
-  motorRpm: ['1200','1800','3600'],
-  motorFrame: ['213T','215T','254T','256T'],
+  gasketMat: ['RTV','Blue food grade'],
+  gearboxBrand: ['Dodge','Vortex'],
+  motorHp: ['3','5','7.5','10','15'],
+  motorRpm: ['1800','3600'],
+  motorFrame: ['184T','213T'],
+  inspector: ['Rat Nuts Bass'],
   beltSize: ['B60','B68','B75'],
   beltQty: ['1','2','3'],
   chainSize: ['#50','#60','#80'],
@@ -346,7 +351,7 @@ const SECTIONS = [
   {num:'04',title:'Inspection & Wear',keys:['wearInlet','wearMid','wearDischarge','wearLiners','wearLinerCond','slackOk','leakOk','setScrewsOk','oilChanged','guardOk','lidsSealed','partsNeeded','notes']}
 ];
 const DRAFT_KEY = 'scpm_draft_v1', REC_KEY = 'scpm_records_v1';
-const DEFAULTS = { pitch: 'Standard', flightThk: '3/8"' };
+const DEFAULTS = { pitch: 'Standard', flightThk: '3/8"', beltQty: '2' };
 const csvCell = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
 
 class Component extends DCLogic {
@@ -369,14 +374,18 @@ class Component extends DCLogic {
 
   applyDerived(f, key) {
     if (key === 'screwDia') {
-      const cur = f.connShaftSize || '';
-      if (!cur || SHAFT_AUTO_VALS.indexOf(cur) >= 0) {
-        const next = SHAFT_BY_SCREW[f.screwDia] || '';
-        if (next !== cur) {
-          f.connShaftSize = next;
-          if (next) this._derivedNote = 'Connecting shaft set to ' + next + ' for ' + f.screwDia + ' screw';
+      const notes = [];
+      const setAuto = (fk, map, autoVals, label) => {
+        const cur = f[fk] || '';
+        if (!cur || autoVals.indexOf(cur) >= 0) {
+          const next = map[f.screwDia] || '';
+          if (next !== cur) { f[fk] = next; if (next) notes.push(label + ' ' + next); }
         }
-      }
+      };
+      setAuto('connShaftSize', SHAFT_BY_SCREW, SHAFT_AUTO_VALS, 'shaft');
+      setAuto('shearPinDia', PIN_DIA_BY_SCREW, PIN_DIA_VALS, 'pin');
+      setAuto('shearPinLen', PIN_LEN_BY_SCREW, PIN_LEN_VALS, 'x');
+      if (notes.length) this._derivedNote = 'Auto-set for ' + f.screwDia + ' screw: ' + notes.join(' ');
     }
     return f;
   }
