@@ -302,7 +302,7 @@
 <script type="text/x-dc" data-dc-script>
 const FIELDS = [
   ['assetId','Asset ID / Tag #','e.g. SC-114'],['location','Location / Area','e.g. Cook Room'],['date','Date','MM/DD/YYYY'],['inspector','Inspector',''],
-  ['screwDia','Screw size (dia)','e.g. 12"'],['screwLen','Overall length','e.g. 24 ft'],['pitch','Pitch','e.g. full / 12"'],['flightThk','Flight thickness','e.g. 3/8"'],
+  ['screwDia','Screw size (dia)','e.g. 12"'],['screwLen','Overall length','e.g. 24 ft'],['pitch','Pitch','custom if not standard'],['flightThk','Flight thickness','e.g. 3/8"'],
   ['rebuildQty','Screws for rebuild (qty)',''],['shearPins','Shear pin count',''],['shearPinDia','Shear pin dia','e.g. 1/4"'],['shearPinLen','Shear pin length','e.g. 1.5"'],['connShaftSize','Connecting shaft size',''],['connShaftQty','Connecting shaft qty',''],['tailShaftSize','Tail shaft size (dia)',''],['plateEnd','Plate end (no tail shaft)?',''],['specialOrder','Special order?',''],['hangerBrg','Hanger bearing',''],['tailBrg','Tail bearing',''],['tailBrgSize','Tail bearing size',''],['tailBrgStyle','Tail bearing style',''],['bushingCap','Brass bushing cap?',''],['wiperLen','Wiper blade length','e.g. 14\"'],['wiperThk','Wiper blade thickness','e.g. 1/4\"'],['wiperDist','Barrel end to wiper start','e.g. 8\"'],['wiperDriveSide','Wiper on drive side?',''],
   ['troughType','Trough type',''],['lidCount','# of lids',''],['lidBolts','Lid bolt count',''],['gasketMat','Gasket material','e.g. blue food grade'],
   ['driveshaftPn','Driveshaft part # / size',''],['gearboxBrand','Gearbox brand','e.g. Dodge, SEW'],['gearboxSize','Gearbox size / model',''],['motorHp','Motor HP',''],['motorFrame','Motor frame','e.g. 256T'],['motorRpm','Motor RPM',''],
@@ -316,8 +316,8 @@ const SELECTS = {specialOrder:['Y','N'],hangerBrg:['Y','N'],tailBrg:['Y','N'],bu
 const AREAS = ['partsNeeded','notes'];
 // Quick-fill chips: STARTER lists from the sheet's own example values — swap for the plant's real most-used parts.
 const SUGGEST = {
-  screwDia: ['6"','9"','12"','16"','20"'],
-  pitch: ['Full','Half'],
+  screwDia: ['16"','12"','9"','6"'],
+  pitch: ['Standard'],
   flightThk: ['1/4"','3/8"','1/2"'],
   shearPinDia: ['1/4"','5/16"','3/8"','1/2"'],
   shearPinLen: ['1"','1.5"','2"'],
@@ -339,6 +339,7 @@ const SECTIONS = [
   {num:'04',title:'Inspection & Wear',keys:['wearInlet','wearMid','wearDischarge','wearLiners','wearLinerCond','slackOk','leakOk','setScrewsOk','oilChanged','guardOk','lidsSealed','partsNeeded','notes']}
 ];
 const DRAFT_KEY = 'scpm_draft_v1', REC_KEY = 'scpm_records_v1';
+const DEFAULTS = { pitch: 'Standard', flightThk: '3/8"' };
 const csvCell = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
 
 class Component extends DCLogic {
@@ -347,7 +348,7 @@ class Component extends DCLogic {
     try {
       const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
       const r = JSON.parse(localStorage.getItem(REC_KEY) || '[]');
-      this.setState({ f: (d && d.f) || {}, photos: (d && d.photos) || [], saved: r });
+      this.setState({ f: { ...DEFAULTS, ...((d && d.f) || {}) }, photos: (d && d.photos) || [], saved: r });
     } catch (e) {}
     try {
       const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
@@ -532,7 +533,7 @@ class Component extends DCLogic {
   };
   loadSheet = e => { const r = this.state.saved[+e.currentTarget.dataset.idx]; if (r) this.setState({ f: { ...r.f }, photos: [] }, () => { this.persistDraft(); this.flash('Loaded ' + (r.f.assetId || 'sheet')); }); };
   deleteSheet = e => { const i = +e.currentTarget.dataset.idx; this.setState(s => { const saved = s.saved.filter((_, j) => j !== i); try { localStorage.setItem(REC_KEY, JSON.stringify(saved)); } catch (err) {} return { saved }; }); };
-  newSheet = () => { if (confirm('Clear this sheet? Unsaved data will be lost.')) this.setState({ f: {}, photos: [] }, () => this.persistDraft()); };
+  newSheet = () => { if (confirm('Clear this sheet? Unsaved data will be lost.')) this.setState({ f: { ...DEFAULTS }, photos: [] }, () => this.persistDraft()); };
 
   renderVals() {
     const { f, photos, saved, toast, csvText, a2hs } = this.state;
