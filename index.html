@@ -379,7 +379,7 @@ class Component extends DCLogic {
     try {
       const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null');
       const r = JSON.parse(localStorage.getItem(REC_KEY) || '[]');
-      this.setState({ f: { ...DEFAULTS, ...((d && d.f) || {}) }, photos: (d && d.photos) || [], saved: r });
+      this.setState({ f: { ...DEFAULTS, ...((d && d.f) || {}), inspector: '' }, photos: (d && d.photos) || [], saved: r });
     } catch (e) {}
     try {
       const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
