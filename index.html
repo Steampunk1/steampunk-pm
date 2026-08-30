@@ -386,11 +386,27 @@ class Component extends DCLogic {
       im.onload = () => { try { const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); this._logo = c.toDataURL('image/jpeg', .9); } catch (e) {} };
       im.src = 'steampunk-logo.jpg';
     } catch (e) {}
+    this._fonts = {};
+    try {
+      this._assetsP = Promise.allSettled([
+        this.loadFont('SairaCondensed-Black.ttf', 'SairaCond'),
+        this.loadFont('Barlow-Medium.ttf', 'BarlowMed'),
+        this.loadFont('JetBrainsMono-SemiBold.ttf', 'JBMono')
+      ]);
+    } catch (e) {}
     try {
       const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
       const seen = localStorage.getItem('scpm_a2hs_done');
       if (!standalone && !seen && window.self === window.top) this.setState({ a2hs: true });
     } catch (e) {}
+  }
+  async loadFont(file, name) {
+    const r = await fetch(file);
+    if (!r.ok) throw new Error(file);
+    const b = new Uint8Array(await r.arrayBuffer());
+    let str = '';
+    for (let i = 0; i < b.length; i += 0x8000) str += String.fromCharCode.apply(null, b.subarray(i, i + 0x8000));
+    this._fonts[name] = { file, b64: btoa(str) };
   }
   persistDraft() { try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ f: this.state.f, photos: this.state.photos })); } catch (e) { this.flash('Storage full - too many photos'); } }
   flash(msg) { this.setState({ toast: msg }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: '' }), 2200); }
@@ -511,25 +527,32 @@ class Component extends DCLogic {
     const tc = c => doc.setTextColor(c[0], c[1], c[2]);
     const fc = c => doc.setFillColor(c[0], c[1], c[2]);
     const dcol = c => doc.setDrawColor(c[0], c[1], c[2]);
+    const FL = {};
+    for (const n in (this._fonts || {})) {
+      try { doc.addFileToVFS(this._fonts[n].file, this._fonts[n].b64); doc.addFont(this._fonts[n].file, n, 'normal'); FL[n] = true; } catch (e) {}
+    }
+    const display = () => FL.SairaCond ? doc.setFont('SairaCond', 'normal') : doc.setFont('helvetica', 'bolditalic');
+    const mono = () => FL.JBMono ? doc.setFont('JBMono', 'normal') : doc.setFont('helvetica', 'normal');
+    const body = () => FL.BarlowMed ? doc.setFont('BarlowMed', 'normal') : doc.setFont('helvetica', 'bold');
     const paintBg = () => { fc(INK); doc.rect(0, 0, 612, 792, 'F'); };
     paintBg();
     let y = M;
     const newPage = () => { doc.addPage(); paintBg(); y = M; };
     if (this._logo) { try { doc.addImage(this._logo, 'JPEG', M, y - 4, 34, 34); } catch (e) {} }
     const hx = this._logo ? M + 44 : M;
-    tc(LIME); doc.setFont('helvetica', 'bold'); doc.setFontSize(7);
-    doc.text('DARLING INGREDIENTS, BYRAM, MISS.  -  PREVENTIVE MAINTENANCE', hx, y + 6);
-    tc(WHITE); doc.setFont('helvetica', 'bolditalic'); doc.setFontSize(19);
-    doc.text('SCREW CONVEYOR PM SHEET', hx, y + 25);
-    tc(GRAY); doc.setFont('helvetica', 'normal'); doc.setFontSize(7);
-    doc.text('STEAMPUNK FABRICATION - (601) 757-3377', M + W, y + 6, { align: 'right' });
+    tc(LIME); mono(); doc.setFontSize(6.5);
+    doc.text('DARLING INGREDIENTS, BYRAM, MISS. - PREVENTIVE MAINTENANCE', hx, y + 6, { charSpace: 0.9 });
+    tc(WHITE); display(); doc.setFontSize(23);
+    doc.text('SCREW CONVEYOR PM SHEET', hx, y + 27);
+    tc(GRAY); mono(); doc.setFontSize(6);
+    doc.text('STEAMPUNK FABRICATION - (601) 757-3377', M + W, y + 6, { align: 'right', charSpace: 0.4 });
     y += 38;
     dcol(BORD); doc.setLineWidth(1); doc.line(M, y, M + W, y);
     y += 14;
     for (const sec of SECTIONS) {
       const pairs = sec.keys.filter(k => !AREAS.includes(k));
       const areas = sec.keys.filter(k => AREAS.includes(k));
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+      body(); doc.setFontSize(9.5);
       const areaData = areas.map(k => {
         const lines = doc.splitTextToSize(S(f[k]).trim() || '-', W - PAD * 2 - 12);
         return { k, lines, bh: Math.max(20, lines.length * 11 + 9) };
@@ -541,31 +564,31 @@ class Component extends DCLogic {
       fc(CARD); dcol(BORD); doc.setLineWidth(0.8);
       doc.roundedRect(M, y, W, cardH, 4, 4, 'FD');
       let cy = y + 12;
-      tc(LIME); doc.setFont('helvetica', 'bolditalic'); doc.setFontSize(11);
+      tc(LIME); display(); doc.setFontSize(12.5);
       doc.text(S(sec.num), M + PAD, cy + 10);
-      tc(WHITE); doc.setFontSize(11.5);
-      doc.text(S(sec.title).toUpperCase(), M + PAD + 22, cy + 10);
+      tc(WHITE); doc.setFontSize(13);
+      doc.text(S(sec.title).toUpperCase(), M + PAD + 20, cy + 10);
       cy += 22;
       for (let i = 0; i < pairs.length; i += 2) {
         for (let j = 0; j < 2; j++) {
           const k = pairs[i + j]; if (!k) continue;
           const x = M + PAD + j * (COLW + 16);
-          tc(GRAY); doc.setFont('helvetica', 'normal'); doc.setFontSize(6.3);
-          doc.text(S(LABELS[k]).toUpperCase(), x, cy + 6);
+          tc(GRAY); mono(); doc.setFontSize(5.8);
+          doc.text(S(LABELS[k]).toUpperCase(), x, cy + 6, { charSpace: 0.4 });
           fc(BOX); dcol(BORD); doc.setLineWidth(0.6);
           doc.roundedRect(x, cy + 9, COLW, 20, 3, 3, 'FD');
           const val = S(f[k]).trim();
-          tc(val ? WHITE : GRAY); doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+          tc(val ? WHITE : GRAY); body(); doc.setFontSize(9.5);
           doc.text(val ? (doc.splitTextToSize(val, COLW - 12)[0] || '') : '-', x + 6, cy + 22);
         }
         cy += ROWH;
       }
       for (const a of areaData) {
-        tc(GRAY); doc.setFont('helvetica', 'normal'); doc.setFontSize(6.3);
-        doc.text(S(LABELS[a.k]).toUpperCase(), M + PAD, cy + 6);
+        tc(GRAY); mono(); doc.setFontSize(5.8);
+        doc.text(S(LABELS[a.k]).toUpperCase(), M + PAD, cy + 6, { charSpace: 0.4 });
         fc(BOX); dcol(BORD); doc.setLineWidth(0.6);
         doc.roundedRect(M + PAD, cy + 9, W - PAD * 2, a.bh, 3, 3, 'FD');
-        tc(WHITE); doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+        tc(WHITE); body(); doc.setFontSize(9.5);
         doc.text(a.lines, M + PAD + 6, cy + 22);
         cy += 19 + a.bh;
       }
@@ -574,10 +597,10 @@ class Component extends DCLogic {
     const photos = this.state.photos;
     if (photos.length) {
       newPage();
-      tc(LIME); doc.setFont('helvetica', 'bolditalic'); doc.setFontSize(12);
+      tc(LIME); display(); doc.setFontSize(13);
       doc.text('05', M, y + 10);
       tc(WHITE);
-      doc.text(S('PHOTOS' + (f.assetId ? ' - ' + f.assetId : '')).toUpperCase(), M + 24, y + 10);
+      doc.text(S('PHOTOS' + (f.assetId ? ' - ' + f.assetId : '')).toUpperCase(), M + 22, y + 10);
       y += 28;
       photos.forEach((p, i) => {
         let iw = W, ih = 290;
@@ -587,7 +610,7 @@ class Component extends DCLogic {
           iw = Math.min(W, pr.width * (ih / pr.height));
         } catch (e) {}
         if (y + ih + 30 > 760) newPage();
-        tc(WHITE); doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+        tc(WHITE); body(); doc.setFontSize(9.5);
         doc.text(S(p.label || 'Photo ' + (i + 1)), M, y + 8);
         try { doc.addImage(p.src, 'JPEG', M, y + 13, iw, ih); } catch (e) {}
         dcol(BORD); doc.setLineWidth(0.8); doc.rect(M, y + 13, iw, ih);
@@ -597,13 +620,14 @@ class Component extends DCLogic {
     const n = doc.getNumberOfPages();
     for (let i = 1; i <= n; i++) {
       doc.setPage(i);
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(6.5); tc(GRAY);
-      doc.text('SCREW CONVEYOR PM - REV A - PAGE ' + i + ' OF ' + n, M, 778);
+      mono(); doc.setFontSize(5.8); tc(GRAY);
+      doc.text('SCREW CONVEYOR PM - REV A - PAGE ' + i + ' OF ' + n, M, 778, { charSpace: 0.5 });
     }
     return doc;
   }
-  exportPDF = () => {
+  exportPDF = async () => {
     if (!window.jspdf) return this.flash('PDF engine not loaded');
+    try { await Promise.race([this._assetsP, new Promise(r => setTimeout(r, 1500))]); } catch (e) {}
     try {
       const doc = this.buildPdf();
       const name = this.fileName('_PM.pdf');
