@@ -372,26 +372,35 @@ class Component extends DCLogic {
   flash(msg) { this.setState({ toast: msg }); clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: '' }), 2200); }
   fileName(ext) { const id = (this.state.f.assetId || 'screw-conveyor').replace(/[^\w-]+/g, '_'); return id + ext; }
 
-  applyDerived(f, key) {
+  applyDerived(f, key, prev) {
+    const notes = [];
+    const setAuto = (fk, map, autoVals, label) => {
+      const cur = f[fk] || '';
+      if (!cur || autoVals.indexOf(cur) >= 0) {
+        const next = map[f.screwDia] || '';
+        if (next !== cur) { f[fk] = next; if (next) notes.push(label + ' ' + next); }
+      }
+    };
     if (key === 'screwDia') {
-      const notes = [];
-      const setAuto = (fk, map, autoVals, label) => {
-        const cur = f[fk] || '';
-        if (!cur || autoVals.indexOf(cur) >= 0) {
-          const next = map[f.screwDia] || '';
-          if (next !== cur) { f[fk] = next; if (next) notes.push(label + ' ' + next); }
-        }
-      };
       setAuto('connShaftSize', SHAFT_BY_SCREW, SHAFT_AUTO_VALS, 'shaft');
       setAuto('shearPinDia', PIN_DIA_BY_SCREW, PIN_DIA_VALS, 'pin');
       setAuto('shearPinLen', PIN_LEN_BY_SCREW, PIN_LEN_VALS, 'x');
-      if (notes.length) this._derivedNote = 'Auto-set for ' + f.screwDia + ' screw: ' + notes.join(' ');
     }
+    if (key === 'screwDia' || key === 'connShaftSize') {
+      // tail shaft mirrors connecting shaft, unless the tech typed their own tail size
+      const t = f.tailShaftSize || '';
+      const follows = !t || SHAFT_AUTO_VALS.indexOf(t) >= 0 || t === ((prev && prev.connShaftSize) || '');
+      if (follows && (f.connShaftSize || '') !== t) {
+        f.tailShaftSize = f.connShaftSize || '';
+        if (f.tailShaftSize) notes.push('tail shaft ' + f.tailShaftSize);
+      }
+    }
+    if (notes.length) this._derivedNote = (key === 'screwDia' ? 'Auto-set for ' + f.screwDia + ' screw: ' : 'Auto-set: ') + notes.join(' ');
     return f;
   }
   setField(key, value) {
     this._derivedNote = null;
-    const f = this.applyDerived({ ...this.state.f, [key]: value }, key);
+    const f = this.applyDerived({ ...this.state.f, [key]: value }, key, this.state.f);
     const note = this._derivedNote;
     this.setState({ f }, () => { this.persistDraft(); if (note) this.flash(note); });
   }
