@@ -197,7 +197,7 @@
             <label style="display:flex;flex-direction:column;gap:5px;gridColumn:{{ fld.span }}">
               <span style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#7E8893">{{ fld.label }}</span>
               <sc-if value="{{ fld.isText }}" hint-placeholder-val="{{ true }}">
-                <input type="text" name="{{ fld.key }}" value="{{ fld.value }}" inputmode="{{ fld.imode }}" onChange="{{ onField }}" placeholder="{{ fld.ph }}" style="background:#1D2228;border:1px solid #323A43;color:#F6F8FA;font:500 16px Barlow,sans-serif;padding:10px 12px;min-height:44px;border-radius:4px;width:100%;box-sizing:border-box">
+                <input type="text" name="{{ fld.key }}" value="{{ fld.value }}" inputmode="{{ fld.imode }}" onChange="{{ onField }}" onBlur="{{ onFieldBlur }}" onKeyDown="{{ onFieldKey }}" placeholder="{{ fld.ph }}" style="background:#1D2228;border:1px solid #323A43;color:#F6F8FA;font:500 16px Barlow,sans-serif;padding:10px 12px;min-height:44px;border-radius:4px;width:100%;box-sizing:border-box">
                 <sc-if value="{{ fld.hasSugg }}" hint-placeholder-val="{{ false }}">
                   <div style="display:flex;gap:5px;flex-wrap:wrap">
                     <sc-for list="{{ fld.sugg }}" as="sg" hint-placeholder-count="0">
@@ -443,13 +443,14 @@ class Component extends DCLogic {
     return f;
   }
   setField(key, value) {
-    if (key === 'inspector' && (value || '').trim() && value !== 'RAT NUTZ') value = 'RAT NUTZ';
     this._derivedNote = null;
     const f = this.applyDerived({ ...this.state.f, [key]: value }, key, this.state.f);
     const note = this._derivedNote;
     this.setState({ f }, () => { this.persistDraft(); if (note) this.flash(note); });
   }
   onField = e => { const { name, value } = e.target; this.setField(name, value); };
+  onFieldBlur = e => { if (e.target.name === 'inspector') { const v = (e.target.value || '').trim(); this.setField('inspector', v ? 'RAT NUTZ' : ''); } };
+  onFieldKey = e => { if (e.target.name === 'inspector' && e.key === 'Enter') { const v = (e.target.value || '').trim(); this.setField('inspector', v ? 'RAT NUTZ' : ''); e.target.blur(); } };
   outF() { return { ...this.state.f, inspector: 'RAT NUTZ' }; }
   pickOption(key, val) { return () => this.setField(key, this.state.f[key] === val ? '' : val); }
   pickToday() { return () => { const d = new Date(); const t = (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear(); this.setState(s => ({ f: { ...s.f, date: s.f.date === t ? '' : t } }), () => this.persistDraft()); }; }
@@ -666,7 +667,7 @@ class Component extends DCLogic {
       a2hs, dismissA2hs: this.dismissA2hs, exportPDF: this.exportPDF,
       saved: saved.map(r => ({ ...r, title: r.f.assetId || '(no ID)', sub: (r.f.location ? r.f.location + ' · ' : '') + r.ts + (r.photoCount ? ' · ' + r.photoCount + ' photos' : '') })),
       hasSaved: saved.length > 0, savedCount: saved.length,
-      onField: this.onField, onPhotos: this.onPhotos, onPhotoLabel: this.onPhotoLabel, removePhoto: this.removePhoto,
+      onField: this.onField, onFieldBlur: this.onFieldBlur, onFieldKey: this.onFieldKey, onPhotos: this.onPhotos, onPhotoLabel: this.onPhotoLabel, removePhoto: this.removePhoto,
       ignoreEdit: this.ignoreEdit, onCsvTap: this.onCsvTap,
       exportCSV: this.exportCSV, exportAll: this.exportAll, copySummary: this.copySummary, downloadPhotos: this.downloadPhotos,
       saveSheet: this.saveSheet, loadSheet: this.loadSheet, deleteSheet: this.deleteSheet, newSheet: this.newSheet
