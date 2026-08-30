@@ -305,7 +305,7 @@ const FIELDS = [
   ['screwDia','Screw size (dia)','e.g. 12"'],['screwLen','Overall length','e.g. 24 ft'],['pitch','Pitch','custom if not standard'],['flightThk','Flight thickness','e.g. 3/8"'],
   ['rebuildQty','Screws for rebuild (qty)',''],['shearPins','Shear pin count',''],['shearPinDia','Shear pin dia','e.g. 1/4"'],['shearPinLen','Shear pin length','e.g. 1.5"'],['connShaftSize','Connecting shaft size',''],['connShaftQty','Connecting shaft qty',''],['tailShaftSize','Tail shaft size (dia)',''],['plateEnd','Plate end (no tail shaft)?',''],['specialOrder','Special order?',''],['hangerBrg','Hanger bearing',''],['tailBrg','Tail bearing',''],['tailBrgSize','Tail bearing size',''],['tailBrgStyle','Tail bearing style',''],['bushingCap','Brass bushing cap?',''],['wiperLen','Wiper blade length','e.g. 14\"'],['wiperThk','Wiper blade thickness','e.g. 1/4\"'],['wiperDist','Barrel end to wiper start','e.g. 8\"'],['wiperDriveSide','Wiper on drive side?',''],
   ['troughType','Trough type',''],['lidCount','# of lids',''],['lidBolts','Lid bolt count',''],['gasketMat','Gasket material','e.g. blue food grade'],
-  ['driveshaftPn','Driveshaft part # / size',''],['gearboxBrand','Gearbox brand','e.g. Dodge, SEW'],['gearboxSize','Gearbox size / model',''],['motorHp','Motor HP',''],['motorFrame','Motor frame','e.g. 256T'],['motorRpm','Motor RPM',''],
+  ['driveshaftPn','Driveshaft part # / size',''],['motorMount','Motor mount assembly #',''],['gearboxBrand','Gearbox brand','e.g. Dodge, SEW'],['gearboxSize','Gearbox size / model',''],['motorHp','Motor HP',''],['motorFrame','Motor frame','e.g. 256T'],['motorRpm','Motor RPM',''],
   ['beltSize','Belt size','e.g. B68'],['beltQty','Belt qty',''],['pulleyMotor','Motor pulley size & hub style',''],['pulleyGearbox','Gearbox pulley size & hub style',''],
   ['chainDriven','Chain driven?',''],['sprocketBoreMotor','Drive sprocket bore',''],['sprocketTeethMotor','Drive sprocket teeth',''],['sprocketBoreDrive','Driven sprocket bore',''],['sprocketTeethDrive','Driven sprocket teeth',''],['chainSize','Chain size','e.g. #60'],
   ['wearInlet','Flight wear - inlet',''],['wearMid','Flight wear - middle',''],['wearDischarge','Flight wear - discharge',''],['wearLiners','Wear liners in trough?',''],['wearLinerCond','Wear liner condition','e.g. good / worn / missing'],
@@ -326,6 +326,10 @@ const PIN_LEN_BY_SCREW = { '9"': '4 1/2"', '12"': '5 1/2"' };
 const PIN_LEN_VALS = ['4"', '4 1/2"', '5 1/2"'];
 const PIN_LEN_BY_DIA = { '1/2"': '4"', '5/8"': '4 1/2"', '3/4"': '5 1/2"' };
 const PIN_DIA_BY_LEN = { '4"': '1/2"', '4 1/2"': '5/8"', '5 1/2"': '3/4"' };
+const GEARBOX_FAMILY = { '325': '3', '315': '3', '425': '4', '415': '4' };
+const SCREW_DS_SUFFIX = { '9"': '2', '12"': '3' };
+const DS_VALS = ['3SCDS-2', '3SCDS-3', '4SCDS-2', '4SCDS-3'];
+const MM_VALS = ['3MMAS', '4MMAS'];
 const NA = 'N/A';
 // N/A correlations: when a condition rules parts out, mark their fields N/A (and un-mark if the condition flips back)
 const CORR = [
@@ -348,6 +352,8 @@ const SUGGEST = {
   gasketMat: ['RTV','Blue food grade'],
   gearboxBrand: ['Dodge','Vortex'],
   gearboxSize: ['325','315','425','415'],
+  driveshaftPn: ['3SCDS-2','3SCDS-3','4SCDS-2','4SCDS-3'],
+  motorMount: ['3MMAS','4MMAS'],
   motorHp: ['3','5','7.5','10','15'],
   motorRpm: ['1800','3600'],
   motorFrame: ['184T','213T','256T'],
@@ -361,7 +367,7 @@ const SECTIONS = [
   {num:'00',title:'Asset',keys:['assetId','location','date','inspector']},
   {num:'01',title:'Screw & Flighting',keys:['screwDia','screwLen','pitch','flightThk','rebuildQty','shearPins','shearPinDia','shearPinLen','connShaftSize','connShaftQty','tailShaftSize','plateEnd','specialOrder','hangerBrg','tailBrg','tailBrgSize','tailBrgStyle','bushingCap','wiperLen','wiperThk','wiperDist','wiperDriveSide']},
   {num:'02',title:'Trough, Lids & Gaskets',keys:['troughType','lidCount','lidBolts','gasketMat'],note:'Blue food-grade gasket required on finished-product screws — Rotex screen (grind room) through Lemanco (loadout).'},
-  {num:'03',title:'Drive Train',keys:['driveshaftPn','gearboxBrand','gearboxSize','motorHp','motorFrame','motorRpm','beltSize','beltQty','pulleyMotor','pulleyGearbox','chainDriven','sprocketBoreMotor','sprocketTeethMotor','sprocketBoreDrive','sprocketTeethDrive','chainSize']},
+  {num:'03',title:'Drive Train',keys:['driveshaftPn','motorMount','gearboxBrand','gearboxSize','motorHp','motorFrame','motorRpm','beltSize','beltQty','pulleyMotor','pulleyGearbox','chainDriven','sprocketBoreMotor','sprocketTeethMotor','sprocketBoreDrive','sprocketTeethDrive','chainSize']},
   {num:'04',title:'Inspection & Wear',keys:['wearInlet','wearMid','wearDischarge','wearLiners','wearLinerCond','slackOk','leakOk','setScrewsOk','oilChanged','guardOk','lidsSealed','lockWashersOk','partsNeeded','notes']}
 ];
 const DRAFT_KEY = 'scpm_draft_v1', REC_KEY = 'scpm_records_v1';
@@ -398,6 +404,13 @@ class Component extends DCLogic {
       fill('connShaftSize', SHAFT_BY_SCREW[f.screwDia] || '', SHAFT_AUTO_VALS, 'shaft');
       fill('shearPinDia', PIN_DIA_BY_SCREW[f.screwDia] || '', PIN_DIA_VALS, 'pin');
       fill('shearPinLen', PIN_LEN_BY_SCREW[f.screwDia] || '', PIN_LEN_VALS, 'x');
+    }
+    // driveshaft + motor mount part numbers from gearbox family (3xx/4xx) and screw size (9"->-2, 12"->-3)
+    if (key === 'screwDia' || key === 'gearboxSize') {
+      const fam = GEARBOX_FAMILY[(f.gearboxSize || '').trim()] || '';
+      const suf = SCREW_DS_SUFFIX[f.screwDia] || '';
+      fill('driveshaftPn', fam && suf ? fam + 'SCDS-' + suf : '', DS_VALS, 'driveshaft');
+      fill('motorMount', fam ? fam + 'MMAS' : '', MM_VALS, 'motor mount');
     }
     // pin dia <-> length pairings (1/2 pairs with 4; 7/8 and 6 have no pair, so they change nothing)
     if (key === 'shearPinDia' && PIN_LEN_BY_DIA[f.shearPinDia]) fill('shearPinLen', PIN_LEN_BY_DIA[f.shearPinDia], PIN_LEN_VALS, 'pin length');
