@@ -522,7 +522,7 @@ class Component extends DCLogic {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'pt', format: 'letter' });
     const f = this.outF(), S = v => this.pdfSafe(v);
-    const M = 36, W = 612 - M * 2, PAD = 14, COLW = (W - PAD * 2 - 16) / 2, ROWH = 36;
+    const M = 36, W = 612 - M * 2, PAD = 16, COLW = (W - PAD * 2 - 16) / 2, ROWH = 40;
     const INK = [10,11,13], CARD = [19,22,25], BOX = [29,34,40], BORD = [50,58,67], GRAY = [126,136,147], WHITE = [246,248,250], LIME = [166,206,57];
     const tc = c => doc.setTextColor(c[0], c[1], c[2]);
     const fc = c => doc.setFillColor(c[0], c[1], c[2]);
@@ -534,6 +534,33 @@ class Component extends DCLogic {
     const display = () => FL.SairaCond ? doc.setFont('SairaCond', 'normal') : doc.setFont('helvetica', 'bolditalic');
     const mono = () => FL.JBMono ? doc.setFont('JBMono', 'normal') : doc.setFont('helvetica', 'normal');
     const body = () => FL.BarlowMed ? doc.setFont('BarlowMed', 'normal') : doc.setFont('helvetica', 'bold');
+    // Headers rendered by the BROWSER's font engine (true Saira Condensed 900 italic, exactly like the app), embedded as images
+    let headsOK = false;
+    try { headsOK = document.fonts && (document.fonts.check('900 20px "Saira Condensed"') || document.fonts.check('italic 900 20px "Saira Condensed"')); } catch (e) {}
+    const dispImg = (parts, sizePt, bg) => {
+      const scale = 3, px = sizePt * scale;
+      const meas = document.createElement('canvas').getContext('2d');
+      const fnt = 'italic 900 ' + px + 'px "Saira Condensed", "Arial Narrow", sans-serif';
+      meas.font = fnt;
+      const gap = px * 0.28;
+      let wsum = 0;
+      const widths = parts.map(pp => { const w = meas.measureText(pp.t).width; wsum += w; return w; });
+      const cnv = document.createElement('canvas');
+      cnv.width = Math.ceil(wsum + gap * (parts.length - 1) + px * 0.4);
+      cnv.height = Math.ceil(px * 1.32);
+      const cx = cnv.getContext('2d');
+      cx.fillStyle = bg; cx.fillRect(0, 0, cnv.width, cnv.height);
+      cx.font = fnt; cx.textBaseline = 'alphabetic';
+      let x = px * 0.04;
+      parts.forEach((pp, i) => { cx.fillStyle = pp.color; cx.fillText(pp.t, x, px * 1.02); x += widths[i] + gap; });
+      return { url: cnv.toDataURL('image/jpeg', 0.85), w: cnv.width / scale, h: cnv.height / scale };
+    };
+    const drawHead = (parts, sizePt, x, yTop, bg, fallback) => {
+      if (headsOK) {
+        try { const im = dispImg(parts, sizePt, bg); doc.addImage(im.url, 'JPEG', x, yTop, im.w, im.h); return; } catch (e) {}
+      }
+      fallback();
+    };
     const paintBg = () => { fc(INK); doc.rect(0, 0, 612, 792, 'F'); };
     paintBg();
     let y = M;
@@ -541,67 +568,68 @@ class Component extends DCLogic {
     if (this._logo) { try { doc.addImage(this._logo, 'JPEG', M, y - 4, 34, 34); } catch (e) {} }
     const hx = this._logo ? M + 44 : M;
     tc(LIME); mono(); doc.setFontSize(6.5);
-    doc.text('DARLING INGREDIENTS, BYRAM, MISS. - PREVENTIVE MAINTENANCE', hx, y + 6, { charSpace: 0.9 });
-    tc(WHITE); display(); doc.setFontSize(23);
-    doc.text('SCREW CONVEYOR PM SHEET', hx, y + 27);
+    doc.text('DARLING INGREDIENTS, BYRAM, MISS. - PREVENTIVE MAINTENANCE', hx, y + 5, { charSpace: 0.9 });
+    drawHead([{ t: 'SCREW CONVEYOR PM SHEET', color: '#F6F8FA' }], 21, hx - 1, y + 9, '#0A0B0D', () => {
+      tc(WHITE); display(); doc.setFontSize(23); doc.text('SCREW CONVEYOR PM SHEET', hx, y + 28);
+    });
     tc(GRAY); mono(); doc.setFontSize(6);
-    doc.text('STEAMPUNK FABRICATION - (601) 757-3377', M + W, y + 6, { align: 'right', charSpace: 0.4 });
-    y += 38;
+    doc.text('STEAMPUNK FABRICATION - (601) 757-3377', M + W, y + 5, { align: 'right', charSpace: 0.4 });
+    y += 42;
     dcol(BORD); doc.setLineWidth(1); doc.line(M, y, M + W, y);
     y += 14;
     for (const sec of SECTIONS) {
       const pairs = sec.keys.filter(k => !AREAS.includes(k));
       const areas = sec.keys.filter(k => AREAS.includes(k));
-      body(); doc.setFontSize(9.5);
+      body(); doc.setFontSize(10);
       const areaData = areas.map(k => {
-        const lines = doc.splitTextToSize(S(f[k]).trim() || '-', W - PAD * 2 - 12);
-        return { k, lines, bh: Math.max(20, lines.length * 11 + 9) };
+        const lines = doc.splitTextToSize(S(f[k]).trim() || '-', W - PAD * 2 - 14);
+        return { k, lines, bh: Math.max(24, lines.length * 11.5 + 13) };
       });
       const rowsH = Math.ceil(pairs.length / 2) * ROWH;
-      const areasH = areaData.reduce((a, x) => a + 19 + x.bh, 0);
-      const cardH = 12 + 14 + 8 + rowsH + areasH + 8;
+      const areasH = areaData.reduce((a, x) => a + 18 + x.bh, 0);
+      const cardH = 14 + 24 + rowsH + areasH + 10;
       if (y + cardH > 758) newPage();
       fc(CARD); dcol(BORD); doc.setLineWidth(0.8);
-      doc.roundedRect(M, y, W, cardH, 4, 4, 'FD');
-      let cy = y + 12;
-      tc(LIME); display(); doc.setFontSize(12.5);
-      doc.text(S(sec.num), M + PAD, cy + 10);
-      tc(WHITE); doc.setFontSize(13);
-      doc.text(S(sec.title).toUpperCase(), M + PAD + 20, cy + 10);
-      cy += 22;
+      doc.rect(M, y, W, cardH, 'FD');
+      let cy = y + 14;
+      drawHead([{ t: S(sec.num), color: '#A6CE39' }, { t: S(sec.title).toUpperCase(), color: '#F6F8FA' }], 12.5, M + PAD - 1, cy - 2, '#131619', () => {
+        tc(LIME); display(); doc.setFontSize(12.5); doc.text(S(sec.num), M + PAD, cy + 10);
+        tc(WHITE); doc.setFontSize(13); doc.text(S(sec.title).toUpperCase(), M + PAD + 20, cy + 10);
+      });
+      cy += 24;
       for (let i = 0; i < pairs.length; i += 2) {
         for (let j = 0; j < 2; j++) {
           const k = pairs[i + j]; if (!k) continue;
           const x = M + PAD + j * (COLW + 16);
-          tc(GRAY); mono(); doc.setFontSize(5.8);
-          doc.text(S(LABELS[k]).toUpperCase(), x, cy + 6, { charSpace: 0.4 });
-          fc(BOX); dcol(BORD); doc.setLineWidth(0.6);
-          doc.roundedRect(x, cy + 9, COLW, 20, 3, 3, 'FD');
+          tc(GRAY); mono(); doc.setFontSize(6.2);
+          doc.text(S(LABELS[k]).toUpperCase(), x, cy + 7, { charSpace: 0.5 });
+          fc(BOX); dcol(BORD); doc.setLineWidth(0.7);
+          doc.roundedRect(x, cy + 10, COLW, 24, 3, 3, 'FD');
           const val = S(f[k]).trim();
-          tc(val ? WHITE : GRAY); body(); doc.setFontSize(9.5);
-          doc.text(val ? (doc.splitTextToSize(val, COLW - 12)[0] || '') : '-', x + 6, cy + 22);
+          tc(val ? WHITE : GRAY); body(); doc.setFontSize(10);
+          doc.text(val ? (doc.splitTextToSize(val, COLW - 14)[0] || '') : '-', x + 7, cy + 25.5);
         }
         cy += ROWH;
       }
       for (const a of areaData) {
-        tc(GRAY); mono(); doc.setFontSize(5.8);
-        doc.text(S(LABELS[a.k]).toUpperCase(), M + PAD, cy + 6, { charSpace: 0.4 });
-        fc(BOX); dcol(BORD); doc.setLineWidth(0.6);
-        doc.roundedRect(M + PAD, cy + 9, W - PAD * 2, a.bh, 3, 3, 'FD');
-        tc(WHITE); body(); doc.setFontSize(9.5);
-        doc.text(a.lines, M + PAD + 6, cy + 22);
-        cy += 19 + a.bh;
+        tc(GRAY); mono(); doc.setFontSize(6.2);
+        doc.text(S(LABELS[a.k]).toUpperCase(), M + PAD, cy + 7, { charSpace: 0.5 });
+        fc(BOX); dcol(BORD); doc.setLineWidth(0.7);
+        doc.roundedRect(M + PAD, cy + 10, W - PAD * 2, a.bh, 3, 3, 'FD');
+        tc(WHITE); body(); doc.setFontSize(10);
+        doc.text(a.lines, M + PAD + 7, cy + 25.5);
+        cy += 18 + a.bh;
       }
       y += cardH + 12;
     }
     const photos = this.state.photos;
     if (photos.length) {
       newPage();
-      tc(LIME); display(); doc.setFontSize(13);
-      doc.text('05', M, y + 10);
-      tc(WHITE);
-      doc.text(S('PHOTOS' + (f.assetId ? ' - ' + f.assetId : '')).toUpperCase(), M + 22, y + 10);
-      y += 28;
+      drawHead([{ t: '05', color: '#A6CE39' }, { t: S('PHOTOS' + (f.assetId ? ' - ' + f.assetId : '')).toUpperCase(), color: '#F6F8FA' }], 13, M - 1, y - 2, '#0A0B0D', () => {
+        tc(LIME); display(); doc.setFontSize(13); doc.text('05', M, y + 10);
+        tc(WHITE); doc.text(S('PHOTOS' + (f.assetId ? ' - ' + f.assetId : '')).toUpperCase(), M + 22, y + 10);
+      });
+      y += 30;
       photos.forEach((p, i) => {
         let iw = W, ih = 290;
         try {
