@@ -198,6 +198,13 @@
               <span style="font:600 10px 'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase;color:#7E8893">{{ fld.label }}</span>
               <sc-if value="{{ fld.isText }}" hint-placeholder-val="{{ true }}">
                 <input type="text" name="{{ fld.key }}" value="{{ fld.value }}" onChange="{{ onField }}" placeholder="{{ fld.ph }}" style="background:#1D2228;border:1px solid #323A43;color:#F6F8FA;font:500 16px Barlow,sans-serif;padding:10px 12px;min-height:44px;border-radius:4px;width:100%;box-sizing:border-box">
+                <sc-if value="{{ fld.hasSugg }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:5px;flex-wrap:wrap">
+                    <sc-for list="{{ fld.sugg }}" as="sg" hint-placeholder-count="0">
+                      <button type="button" onClick="{{ sg.pick }}" style="background:{{ sg.bg }};border:1px solid {{ sg.border }};color:{{ sg.color }};font:600 13px Barlow,sans-serif;padding:7px 11px;min-height:38px;border-radius:999px;cursor:pointer">{{ sg.label }}</button>
+                    </sc-for>
+                  </div>
+                </sc-if>
               </sc-if>
               <sc-if value="{{ fld.isSelect }}" hint-placeholder-val="{{ false }}">
                 <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -307,6 +314,23 @@ const FIELDS = [
 const LABELS = Object.fromEntries(FIELDS.map(f => [f[0], f[1]]));
 const SELECTS = {specialOrder:['Y','N'],hangerBrg:['Y','N'],tailBrg:['Y','N'],bushingCap:['Y','N'],plateEnd:['Y','N'],troughType:['U trough','Pipe trough'],chainDriven:['Y','N'],slackOk:['Yes - OK','Slack found'],leakOk:['Yes - sealed','Leak point found'],setScrewsOk:['Y','N'],oilChanged:['Y','N'],guardOk:['Y','N'],lidsSealed:['Y','N'],wearLiners:['Y','N'],wiperDriveSide:['Y','N','No wiper']};
 const AREAS = ['partsNeeded','notes'];
+// Quick-fill chips: STARTER lists from the sheet's own example values — swap for the plant's real most-used parts.
+const SUGGEST = {
+  screwDia: ['6"','9"','12"','16"','20"'],
+  pitch: ['Full','Half'],
+  flightThk: ['1/4"','3/8"','1/2"'],
+  shearPinDia: ['1/4"','5/16"','3/8"','1/2"'],
+  shearPinLen: ['1"','1.5"','2"'],
+  gasketMat: ['Blue food grade','Red rubber'],
+  gearboxBrand: ['Dodge','SEW'],
+  motorHp: ['5','7.5','10','15','20','25'],
+  motorRpm: ['1200','1800','3600'],
+  motorFrame: ['213T','215T','254T','256T'],
+  beltSize: ['B60','B68','B75'],
+  beltQty: ['1','2','3'],
+  chainSize: ['#50','#60','#80'],
+  wearLinerCond: ['Good','Worn','Missing']
+};
 const SECTIONS = [
   {num:'00',title:'Asset',keys:['assetId','location','date','inspector']},
   {num:'01',title:'Screw & Flighting',keys:['screwDia','screwLen','pitch','flightThk','rebuildQty','shearPins','shearPinDia','shearPinLen','connShaftSize','connShaftQty','tailShaftSize','plateEnd','specialOrder','hangerBrg','tailBrg','tailBrgSize','tailBrgStyle','bushingCap','wiperLen','wiperThk','wiperDist','wiperDriveSide']},
@@ -337,6 +361,7 @@ class Component extends DCLogic {
 
   onField = e => { const { name, value } = e.target; this.setState(s => ({ f: { ...s.f, [name]: value } }), () => this.persistDraft()); };
   pickOption(key, val) { return () => this.setState(s => ({ f: { ...s.f, [key]: s.f[key] === val ? '' : val } }), () => this.persistDraft()); }
+  pickToday() { return () => { const d = new Date(); const t = (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear(); this.setState(s => ({ f: { ...s.f, date: s.f.date === t ? '' : t } }), () => this.persistDraft()); }; }
   onPhotos = async e => {
     const files = Array.from(e.target.files || []); e.target.value = '';
     for (const file of files) {
@@ -522,7 +547,15 @@ class Component extends DCLogic {
           bg: val === opt ? '#A6CE39' : '#1D2228', border: val === opt ? '#A6CE39' : '#323A43', color: val === opt ? '#0A0B0D' : '#F6F8FA',
           pick: this.pickOption(k, opt)
         }));
-        return { key: k, label: fd[1], ph: fd[2], value: val, options, isSelect, isArea, isText: !isSelect && !isArea, span: isArea ? '1 / -1' : 'auto' };
+        const d = new Date();
+        const today = (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear();
+        const suggVals = k === 'date' ? [today] : (SUGGEST[k] || []);
+        const sugg = suggVals.map(v => ({
+          label: k === 'date' ? 'Today' : v, active: val === v,
+          bg: val === v ? '#A6CE39' : '#131619', border: val === v ? '#A6CE39' : '#3B444F', color: val === v ? '#0A0B0D' : '#A6AEB7',
+          pick: this.pickOption(k, v)
+        }));
+        return { key: k, label: fd[1], ph: fd[2], value: val, options, sugg, hasSugg: sugg.length > 0, isSelect, isArea, isText: !isSelect && !isArea, span: isArea ? '1 / -1' : 'auto' };
       })
     }));
     return {
